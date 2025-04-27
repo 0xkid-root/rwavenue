@@ -68,6 +68,7 @@ interface AuthState {
   updateKYCStatus: (status: KYCData['status']) => Promise<void>;
   toggleRole: (role: 'buyer' | 'seller', enabled: boolean) => Promise<void>;
   connectBankAccount: (accountDetails: any) => Promise<void>;
+  clearError: () => void; // Added clearError to the interface
 }
 
 const mockUsers = [
@@ -211,18 +212,60 @@ export const useAuthStore = create<AuthState>()(
       connectWallet: async () => {
         try {
           set({ loading: true, error: null });
-
+      
           if (!(window as any).ethereum) {
             throw new Error('Please install MetaMask or another Web3 wallet.');
           }
-
+      
           const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+          const network = await provider.getNetwork();
+      
+          // Check if the current network is Pharos Devnet (Chain ID 50002)
+          const PHAROS_DEVNET_CHAIN_ID = 50002;
+          if (network.chainId !== PHAROS_DEVNET_CHAIN_ID) {
+            try {
+              await (window as any).ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: ethers.utils.hexlify(PHAROS_DEVNET_CHAIN_ID) }],
+              });
+            } catch (switchError) {
+              if ((switchError as any).code === 4902) {
+                // Chain not added, add Pharos Devnet
+                await (window as any).ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [
+                    {
+                      chainId: ethers.utils.hexlify(PHAROS_DEVNET_CHAIN_ID),
+                      chainName: 'Pharos Devnet',
+                      rpcUrls: ['https://devnet.dplabs-internal.com'],
+                      nativeCurrency: {
+                        name: 'Pharos',
+                        symbol: 'pharos',
+                        decimals: 18,
+                      },
+                      blockExplorerUrls: ['https://pharosscan.xyz'],
+                    },
+                  ],
+                });
+              } else {
+                throw new Error('Failed to switch to Pharos Devnet. Please switch manually.');
+              }
+            }
+          }
+      
+          // Request accounts after ensuring the correct network
           const accounts = await provider.send('eth_requestAccounts', []);
           const address = accounts[0];
-          const network = await provider.getNetwork();
-          const balance = await provider.getBalance(address);
+      
+          // Fetch balance (with timeout to handle potential RPC delays)
+          const balance = await Promise.race([
+            provider.getBalance(address),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Timeout fetching balance')), 5000)
+            ),
+          ]);
           const formattedBalance = ethers.utils.formatEther(balance);
-
+      
           const userId = crypto.randomUUID();
           const newUser = {
             id: userId,
@@ -242,19 +285,28 @@ export const useAuthStore = create<AuthState>()(
               totalSales: 0,
             },
           };
-
+      
+          // Set up event listeners
+          (window as any).ethereum.removeAllListeners('accountsChanged'); // Avoid duplicate listeners
+          (window as any).ethereum.removeAllListeners('chainChanged');
+      
           (window as any).ethereum.on('accountsChanged', async (accounts: string[]) => {
             if (accounts.length === 0) {
               await get().disconnectWallet();
             } else {
-              await get().connectWallet();
+              // Avoid recursive calls by checking current state
+              const currentState = get();
+              if (!currentState.isAuthenticated || currentState.user?.wallet?.address !== accounts[0]) {
+                await get().connectWallet();
+              }
             }
           });
-
-          (window as any).ethereum.on('chainChanged', () => {
-            window.location.reload();
+      
+          (window as any).ethereum.on('chainChanged', async () => {
+            // Refresh connection instead of full reload
+            await get().connectWallet();
           });
-
+      
           set({
             isAuthenticated: true,
             user: newUser,
@@ -267,6 +319,10 @@ export const useAuthStore = create<AuthState>()(
               errorMessage = 'Wallet connection was rejected.';
             } else if (error.message.includes('MetaMask')) {
               errorMessage = 'Please install MetaMask to continue.';
+            } else if (error.message.includes('switch') || error.message.includes('chain')) {
+              errorMessage = 'Please switch to Pharos Devnet manually in MetaMask.';
+            } else if (error.message.includes('timeout')) {
+              errorMessage = 'Timeout connecting to Pharos Devnet. Check your internet or RPC.';
             }
           }
           set({
@@ -275,7 +331,7 @@ export const useAuthStore = create<AuthState>()(
           });
         }
       },
-
+      
       disconnectWallet: async () => {
         try {
           set({ loading: true, error: null });
@@ -401,6 +457,8 @@ export const useAuthStore = create<AuthState>()(
           });
         }
       },
+
+      clearError: () => set({ error: null }), // Implementation of clearError
     }),
     {
       name: 'auth-storage',

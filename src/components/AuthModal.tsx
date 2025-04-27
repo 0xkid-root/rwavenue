@@ -17,7 +17,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const { login, register, connectWallet, loading, error } = useAuthStore();
+  
+  // Updated to include clearError from useAuthStore
+  const { login, register, connectWallet, loading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
   // Handle escape key press
@@ -45,14 +47,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   // Handle traditional form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError(); // Clear any previous errors before attempting login/register
     if (isLogin) {
       await login(email, password);
-      if (!error) {
+      const { error, isAuthenticated } = useAuthStore.getState();
+      if (!error && isAuthenticated) {
+        navigate('/dashboard'); // Navigate to dashboard on successful login
         onClose();
       }
     } else {
       await register(name, email, password);
-      if (!error) {
+      const { error, isAuthenticated } = useAuthStore.getState();
+      if (!error && isAuthenticated) {
+        navigate('/dashboard'); // Navigate to dashboard on successful registration
         onClose();
       }
     }
@@ -60,9 +67,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   // Handle Web3 wallet connection
   const handleWeb3Connect = async () => {
+    clearError(); // Clear any previous errors before attempting wallet connection
     await connectWallet();
-    navigate('/dashboard');
-    if (!error) {
+    const { error, isAuthenticated } = useAuthStore.getState();
+    if (!error && isAuthenticated) {
+      navigate('/dashboard'); // Only navigate if connection is successful
       onClose();
     }
   };
@@ -73,6 +82,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setEmail('');
     setPassword('');
     setName('');
+    clearError(); // Clear error when toggling modes
   };
 
   const toggleWeb3Mode = () => {
@@ -80,6 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setEmail('');
     setPassword('');
     setName('');
+    clearError(); // Clear error when toggling to/from Web3 mode
   };
 
   return (
@@ -173,6 +184,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                               className="w-full px-4 py-2.5 pl-10 text-gray-900 rounded-lg border border-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Enter your name"
                               autoComplete="name"
+                              disabled={loading} // Disable input while loading
                             />
                             <User
                               className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
@@ -200,6 +212,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             className="w-full px-4 py-2.5 pl-10 text-gray-900 rounded-lg border border-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter your email"
                             autoComplete="email"
+                            disabled={loading} // Disable input while loading
                           />
                           <Mail
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
@@ -228,6 +241,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             autoComplete={
                               isLogin ? 'current-password' : 'new-password'
                             }
+                            disabled={loading} // Disable input while loading
                           />
                           <Lock
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
@@ -244,6 +258,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                               name="remember-me"
                               type="checkbox"
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+                              disabled={loading} // Disable checkbox while loading
                             />
                             <label
                               htmlFor="remember-me"
@@ -256,6 +271,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                           <button
                             type="button"
                             className="text-sm font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                            disabled={loading} // Disable button while loading
                           >
                             Forgot password?
                           </button>
@@ -264,10 +280,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
                       {error && (
                         <div
-                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
+                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm flex items-center justify-between"
                           role="alert"
                         >
-                          {error}
+                          <span>{error}</span>
+                          <button
+                            type="button"
+                            onClick={clearError}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Retry
+                          </button>
                         </div>
                       )}
 
@@ -295,6 +318,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                           type="button"
                           onClick={toggleAuthMode}
                           className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                          disabled={loading} // Disable button while loading
                         >
                           {isLogin ? 'Sign up' : 'Sign in'}
                         </button>
@@ -314,10 +338,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       </Button>
                       {error && (
                         <div
-                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
+                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm flex items-center justify-between"
                           role="alert"
                         >
-                          {error}
+                          <span>{error}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              clearError();
+                              handleWeb3Connect();
+                            }}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Retry
+                          </button>
                         </div>
                       )}
                     </div>
@@ -330,6 +364,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       type="button"
                       onClick={toggleWeb3Mode}
                       className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                      disabled={loading} // Disable button while loading
                     >
                       {isWeb3Mode ? 'Sign in with Email' : 'Connect Wallet'}
                     </button>
