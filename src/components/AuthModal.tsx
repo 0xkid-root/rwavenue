@@ -1,0 +1,345 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, ArrowRight, X, User, Wallet } from 'lucide-react';
+import { Button } from './ui/Button';
+import { useAuthStore } from '@/store/authStore';
+import { AnimatedLogo } from './AnimatedLogo';
+import { useNavigate } from 'react-router-dom';
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [isWeb3Mode, setIsWeb3Mode] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const { login, register, connectWallet, loading, error } = useAuthStore();
+  const navigate = useNavigate();
+
+  // Handle escape key press
+  const handleEscapeKey = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  // Add/remove event listeners
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, handleEscapeKey]);
+
+  // Handle traditional form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLogin) {
+      await login(email, password);
+      if (!error) {
+        onClose();
+      }
+    } else {
+      await register(name, email, password);
+      if (!error) {
+        onClose();
+      }
+    }
+  };
+
+  // Handle Web3 wallet connection
+  const handleWeb3Connect = async () => {
+    await connectWallet();
+    navigate('/dashboard');
+    if (!error) {
+      onClose();
+    }
+  };
+
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+    setIsWeb3Mode(false);
+    setEmail('');
+    setPassword('');
+    setName('');
+  };
+
+  const toggleWeb3Mode = () => {
+    setIsWeb3Mode(!isWeb3Mode);
+    setEmail('');
+    setPassword('');
+    setName('');
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-[2px]"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+
+          {/* Modal Container */}
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              {/* Modal Content */}
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="relative w-full max-w-[456px] transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  {/* Close button */}
+                  <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-600 transition-colors rounded-full hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-label="Close modal"
+                  >
+                    <X size={20} />
+                  </button>
+
+                  {/* Header */}
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="w-[180px]" aria-hidden="true">
+                      <AnimatedLogo />
+                    </div>
+                    <h2
+                      id="modal-title"
+                      className="text-[28px] font-bold text-blue-700"
+                    >
+                      {isWeb3Mode
+                        ? 'Connect Wallet'
+                        : isLogin
+                        ? 'Welcome back'
+                        : 'Create an account'}
+                    </h2>
+                    <p className="text-base text-neutral-600">
+                      {isWeb3Mode
+                        ? 'Connect your wallet to access the platform'
+                        : isLogin
+                        ? 'Sign in to access your account'
+                        : 'Join our community of asset owners'}
+                    </p>
+                  </div>
+
+                  {/* Form or Web3 Button */}
+                  {!isWeb3Mode ? (
+                    <form
+                      className="mt-8 space-y-5"
+                      onSubmit={handleSubmit}
+                      noValidate
+                    >
+                      {!isLogin && (
+                        <div>
+                          <label
+                            htmlFor="name"
+                            className="block text-sm font-medium text-neutral-700 mb-1"
+                          >
+                            Full Name
+                          </label>
+                          <div className="relative">
+                            <input
+                              id="name"
+                              name="name"
+                              type="text"
+                              required
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              className="w-full px-4 py-2.5 pl-10 text-gray-900 rounded-lg border border-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Enter your name"
+                              autoComplete="name"
+                            />
+                            <User
+                              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
+                          Email address
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full px-4 py-2.5 pl-10 text-gray-900 rounded-lg border border-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your email"
+                            autoComplete="email"
+                          />
+                          <Mail
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="password"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-4 py-2.5 pl-10 text-gray-900 rounded-lg border border-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your password"
+                            autoComplete={
+                              isLogin ? 'current-password' : 'new-password'
+                            }
+                          />
+                          <Lock
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400"
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </div>
+
+                      {isLogin && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              id="remember-me"
+                              name="remember-me"
+                              type="checkbox"
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+                            />
+                            <label
+                              htmlFor="remember-me"
+                              className="ml-2 block text-sm text-neutral-700"
+                            >
+                              Remember me
+                            </label>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
+                      )}
+
+                      {error && (
+                        <div
+                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
+                          role="alert"
+                        >
+                          {error}
+                        </div>
+                      )}
+
+                      <Button
+                        type="submit"
+                        fullWidth
+                        disabled={loading}
+                        icon={<ArrowRight size={16} />}
+                        iconPosition="right"
+                      >
+                        {loading
+                          ? isLogin
+                            ? 'Signing in...'
+                            : 'Creating account...'
+                          : isLogin
+                          ? 'Sign in'
+                          : 'Create account'}
+                      </Button>
+
+                      <p className="text-center text-sm text-neutral-600">
+                        {isLogin
+                          ? "Don't have an account?"
+                          : 'Already have an account?'}{' '}
+                        <button
+                          type="button"
+                          onClick={toggleAuthMode}
+                          className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                        >
+                          {isLogin ? 'Sign up' : 'Sign in'}
+                        </button>
+                      </p>
+                    </form>
+                  ) : (
+                    <div className="mt-8 space-y-5">
+                      <Button
+                        fullWidth
+                        disabled={loading}
+                        icon={<Wallet size={16} />}
+                        iconPosition="left"
+                        onClick={handleWeb3Connect}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                      >
+                        {loading ? 'Connecting...' : 'Continue with Wallet'}
+                      </Button>
+                      {error && (
+                        <div
+                          className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
+                          role="alert"
+                        >
+                          {error}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Toggle Web3 Mode */}
+                  <p className="text-center text-sm text-neutral-600 mt-4">
+                    {isWeb3Mode ? 'Use email instead?' : 'Use a wallet instead?'}{' '}
+                    <button
+                      type="button"
+                      onClick={toggleWeb3Mode}
+                      className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                    >
+                      {isWeb3Mode ? 'Sign in with Email' : 'Connect Wallet'}
+                    </button>
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
