@@ -13,7 +13,7 @@ export const CategoryFilter = ({ selectedCategory, onCategoryChange }: CategoryF
     { value: 'watches', label: 'Watches', icon: '⌚' },
     { value: 'art', label: 'Art', icon: '🎨' },
     { value: 'collectibles', label: 'Collectibles', icon: '🏆' },
-    { value: 'jewels', label: 'Jewels', icon: '💎' },
+    { value: 'jewelry', label: 'Jewelry', icon: '💎' },
     { value: 'real-estate', label: 'Real Estate', icon: '🏠' },
   ];
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Sun, Moon, LogOut } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedLogo } from '../AnimatedLogo';
@@ -81,10 +81,10 @@ export const Header = () => {
     return <Button onClick={handleOpenAuthModal}>Sign In</Button>;
   };
 
-  // const navItems = [
-  //   { name: 'Marketplace', path: '/marketplace' },
-  //   { name: 'Community', path: '/community' },
-  // ];
+  const navItems = [
+    { name: 'Marketplace', path: '/marketplace' },
+    { name: 'Community', path: '/community' },
+  ];
 
   return (
     <header
@@ -102,7 +102,7 @@ export const Header = () => {
           </div>
 
           {/* Desktop Navigation - Centered */}
-          {/* <nav className="hidden md:flex flex-1 justify-center items-center">
+           <nav className="hidden md:flex flex-1 justify-center items-center">
             <div className="flex items-center gap-8">
               {navItems.map((item) => (
                 <Link
@@ -118,7 +118,7 @@ export const Header = () => {
                 </Link>
               ))}
             </div>
-          </nav> */}
+          </nav> 
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">

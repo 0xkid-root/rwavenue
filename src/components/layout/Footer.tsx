@@ -55,16 +55,16 @@ export const Footer = () => {
                 <li key={item.name}>
                   <Link
                     to={item.path}
-                    className={`text-neutral-300 hover:text-white transition-colors text-sm ${
+                    className={`text-white hover:text-white transition-colors text-sm ${
                       !isAuthenticated &&
-                      ['/marketplace', '/tokenize', '/validators'].includes(item.path)
+                      [ '/tokenize', '/validators'].includes(item.path)
                         ? 'text-white'
                         : ''
                     }`}
                     onClick={(e) => {
                       if (
                         !isAuthenticated &&
-                        ['/marketplace', '/tokenize', '/validators','/explorer'].includes(item.path)
+                        ['/tokenize', '/validators','/explorer'].includes(item.path)
                       ) {
                         e.preventDefault();
                         handleOpenAuthModal();

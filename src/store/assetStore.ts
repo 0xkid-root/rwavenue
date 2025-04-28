@@ -72,20 +72,20 @@ export const useAssetStore = create<AssetState>((set, get) => ({
       const user = useUserStore.getState().user;
       if (!user) throw new Error('User not authenticated');
 
-      const newAsset: Asset = {
-        ...asset,
+    const newAsset: Asset = {
+      ...asset,
         id: Math.random().toString(36).substr(2, 9),
         status: 'pending',
         owner: {
           id: user.id,
           name: user.name
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
         views: 0,
         likes: 0,
         value: asset.price.amount
-      };
+    };
 
       set((state) => ({
         assets: [...state.assets, newAsset],
@@ -100,13 +100,13 @@ export const useAssetStore = create<AssetState>((set, get) => ({
   updateAsset: async (id, assetUpdate) => {
     set({ isLoading: true, error: null });
     try {
-      set((state) => ({
-        assets: state.assets.map((asset) =>
-          asset.id === id
+    set((state) => ({
+      assets: state.assets.map((asset) =>
+        asset.id === id
             ? { ...asset, ...assetUpdate, updatedAt: new Date() }
-            : asset
-        ),
-      }));
+          : asset
+      ),
+    }));
     } catch (error) {
       set({ error: (error as Error).message });
     } finally {
@@ -117,8 +117,8 @@ export const useAssetStore = create<AssetState>((set, get) => ({
   deleteAsset: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      set((state) => ({
-        assets: state.assets.filter((asset) => asset.id !== id),
+    set((state) => ({
+      assets: state.assets.filter((asset) => asset.id !== id),
         selectedAsset: state.selectedAsset?.id === id ? null : state.selectedAsset,
       }));
     } catch (error) {

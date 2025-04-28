@@ -11,7 +11,6 @@ interface Asset extends MarketplaceAsset {
   value: number;
   createdAt: Date;
   validatedAt?: Date;
-  owner: string;
 }
 
 interface Transaction {
@@ -55,6 +54,121 @@ interface MockDataStore {
 
 // Sample mock data
 const mockAssets: Asset[] = [
+  // Real Estate Assets
+  {
+    id: 're1',
+    title: 'Luxury Downtown Penthouse',
+    description: 'Stunning 3-bedroom penthouse with panoramic city views, private elevator, and rooftop terrace',
+    category: 'real-estate',
+    status: 'validated',
+    value: 3500000,
+    imageUrl: '/assets/real-estate/penthouse-1.jpg.svg',
+    createdAt: new Date('2024-01-05'),
+    validatedAt: new Date('2024-01-12'),
+    owner: {
+      id: 'user789',
+      name: 'Emma Thompson',
+      rating: 4.8
+    },
+    tokenization: {
+      type: 'fractional',
+      totalTokens: 1000,
+      availableTokens: 850,
+      pricePerToken: 3500
+    },
+    updatedAt: new Date('2024-01-05'),
+    views: 450,
+    likes: 120,
+    price: { amount: 3500000, currency: 'USDT' },
+    isVerified: true,
+    listingType: 'fixed'
+  },
+  {
+    id: 're2',
+    title: 'Historic Vineyard Estate',
+    description: 'Magnificent 50-acre wine estate with main villa, guest house, and productive vineyard',
+    category: 'real-estate',
+    status: 'pending',
+    value: 8500000,
+    imageUrl: '/assets/real-estate/vineyard-1.jpg.svg',
+    createdAt: new Date('2024-02-10'),
+    owner: {
+      id: 'user456',
+      name: 'Robert Wilson',
+      rating: 4.6
+    },
+    tokenization: {
+      type: 'fractional',
+      totalTokens: 2000,
+      availableTokens: 2000,
+      pricePerToken: 4250
+    },
+    updatedAt: new Date('2024-02-10'),
+    views: 280,
+    likes: 95,
+    price: { amount: 8500000, currency: 'USDT' },
+    isVerified: false,
+    listingType: 'auction',
+    auctionEndTime: '2024-04-10T00:00:00Z'
+  },
+
+  // Jewelry Assets
+  {
+    id: 'j1',
+    title: 'Art Deco Diamond Ring',
+    description: 'Exquisite 1920s platinum ring featuring a 3.5ct center diamond with sapphire accents',
+    category: 'jewelry',
+    status: 'validated',
+    value: 85000,
+    imageUrl: '/assets/jewelry/diamond-ring-1.jpg.svg',
+    createdAt: new Date('2024-01-18'),
+    validatedAt: new Date('2024-01-25'),
+    owner: {
+      id: 'user234',
+      name: 'Isabella Chen',
+      rating: 4.9
+    },
+    tokenization: {
+      type: 'whole',
+      totalTokens: 1,
+      availableTokens: 1,
+      pricePerToken: 85000
+    },
+    updatedAt: new Date('2024-01-18'),
+    views: 320,
+    likes: 78,
+    price: { amount: 85000, currency: 'USDT' },
+    isVerified: true,
+    listingType: 'fixed'
+  },
+  {
+    id: 'j2',
+    title: 'Emerald and Pearl Tiara',
+    description: 'Royal collection piece featuring natural Colombian emeralds and South Sea pearls',
+    category: 'jewelry',
+    status: 'action_required',
+    value: 125000,
+    imageUrl: '/assets/jewelry/tiara-1.jpg.svg',
+    createdAt: new Date('2024-02-15'),
+    owner: {
+      id: 'user567',
+      name: 'Victoria Adams',
+      rating: 4.7
+    },
+    tokenization: {
+      type: 'fractional',
+      totalTokens: 100,
+      availableTokens: 100,
+      pricePerToken: 1250
+    },
+    updatedAt: new Date('2024-02-15'),
+    views: 180,
+    likes: 45,
+    price: { amount: 125000, currency: 'USDT' },
+    isVerified: false,
+    listingType: 'auction',
+    auctionEndTime: '2024-03-15T00:00:00Z'
+  },
   {
     id: '1',
     title: 'Vintage Rolex Daytona',
@@ -62,10 +176,23 @@ const mockAssets: Asset[] = [
     category: 'watches',
     status: 'validated',
     value: 180000,
-    imageUrl: '/assets/watches/rolex-daytona.jpg',
+    imageUrl: '/assets/watches/rolex-daytona.jpg.svg',
     createdAt: new Date('2024-01-15'),
     validatedAt: new Date('2024-01-20'),
-    owner: 'user123',
+    owner: {
+      id: 'user123',
+      name: 'John Doe',
+      rating: 4.5
+    },
+    tokenization: {
+      type: 'whole',
+      totalTokens: 1,
+      availableTokens: 1,
+      pricePerToken: 180000
+    },
+    updatedAt: new Date('2024-01-15'),
+    views: 250,
+    likes: 45,
     price: { amount: 180000, currency: 'USDT' },
     isVerified: true,
     listingType: 'fixed'
@@ -77,9 +204,22 @@ const mockAssets: Asset[] = [
     category: 'art',
     status: 'pending',
     value: 15000,
-    imageUrl: '/assets/art/abstract-1.jpg',
+    imageUrl: '/assets/art/abstract-1.jpg.svg',
     createdAt: new Date('2024-02-01'),
-    owner: 'user123',
+    owner: {
+      id: 'user123',
+      name: 'John Doe',
+      rating: 4.5
+    },
+    tokenization: {
+      type: 'fractional',
+      totalTokens: 100,
+      availableTokens: 100,
+      pricePerToken: 150
+    },
+    updatedAt: new Date('2024-02-01'),
+    views: 75,
+    likes: 20,
     price: { amount: 15000, currency: 'USDT' },
     isVerified: false,
     listingType: 'auction',
@@ -92,9 +232,22 @@ const mockAssets: Asset[] = [
     category: 'jewelry',
     status: 'action_required',
     value: 45000,
-    imageUrl: '/assets/jewelry/sapphire-necklace.jpg',
+    imageUrl: '/assets/jewelry/sapphire-necklace.jpg.svg',
     createdAt: new Date('2024-01-25'),
-    owner: 'user123',
+    owner: {
+      id: 'user123',
+      name: 'John Doe',
+      rating: 4.5
+    },
+    tokenization: {
+      type: 'whole',
+      totalTokens: 1,
+      availableTokens: 1,
+      pricePerToken: 45000
+    },
+    updatedAt: new Date('2024-01-25'),
+    views: 120,
+    likes: 35,
     price: { amount: 45000, currency: 'USDT' },
     isVerified: false,
     listingType: 'fixed'
@@ -106,10 +259,23 @@ const mockAssets: Asset[] = [
     category: 'real-estate',
     status: 'validated',
     value: 2500000,
-    imageUrl: '/assets/real-estate/villa-1.jpg',
+    imageUrl: '/assets/real-estate/villa-1.jpg.svg',
     createdAt: new Date('2024-01-10'),
     validatedAt: new Date('2024-01-18'),
-    owner: 'user123',
+    owner: {
+      id: 'user123',
+      name: 'John Doe',
+      rating: 4.5
+    },
+    tokenization: {
+      type: 'fractional',
+      totalTokens: 1000,
+      availableTokens: 1000,
+      pricePerToken: 2500
+    },
+    updatedAt: new Date('2024-01-10'),
+    views: 300,
+    likes: 85,
     price: { amount: 2500000, currency: 'USDT' },
     isVerified: true,
     listingType: 'fixed'
@@ -121,9 +287,22 @@ const mockAssets: Asset[] = [
     category: 'collectibles',
     status: 'action_required',
     value: 75000,
-    imageUrl: '/assets/collectibles/baseball-cards.jpg',
+    imageUrl: '/assets/collectibles/baseball-cards.jpg.svg',
     createdAt: new Date('2024-02-05'),
-    owner: 'user123',
+    owner: {
+      id: 'user123',
+      name: 'John Doe',
+      rating: 4.5
+    },
+    tokenization: {
+      type: 'whole',
+      totalTokens: 1,
+      availableTokens: 1,
+      pricePerToken: 75000
+    },
+    updatedAt: new Date('2024-02-05'),
+    views: 90,
+    likes: 25,
     price: { amount: 75000, currency: 'USDT' },
     isVerified: false,
     listingType: 'fixed'
@@ -229,12 +408,17 @@ export const useMockDataStore = create<MockDataStore>((set, get) => ({
   loadMoreAssets: async () => {
     set({ loading: true });
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    set({ loading: false });
+      set({ loading: false });
   },
 
   filterAssets: (category?: AssetType, priceRange?: [number, number], verifiedOnly?: boolean) => {
     const { assets } = get();
-    return assets;
+    return assets.filter(asset => {
+      const matchesCategory = !category || asset.category === category;
+      const matchesPriceRange = !priceRange || (asset.price.amount >= priceRange[0] && asset.price.amount <= priceRange[1]);
+      const matchesVerification = !verifiedOnly || asset.isVerified;
+      return matchesCategory && matchesPriceRange && matchesVerification;
+    });
   },
 
   searchAssets: (query: string) => {
