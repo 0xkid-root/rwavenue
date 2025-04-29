@@ -14,6 +14,7 @@ const ProfilePage = React.lazy(() => import('./pages/profile/ProfilePage'));
 const ValidatorsPage = React.lazy(() => import('./pages/ValidatorsPage'));
 const MarketplacePage = React.lazy(() => import('./pages/MarketplacePage'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
+const AssetDetailPage = React.lazy(() => import('./pages/AssetDetailPage'));
 
 // Loading component
 const PageLoader = () => (
@@ -44,6 +45,15 @@ function App() {
               <Header />
               <main className="flex-grow bg-neutral-50">
                 <MarketplacePage />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/asset/:id" element={
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow bg-neutral-50">
+                <AssetDetailPage />
               </main>
               <Footer />
             </div>

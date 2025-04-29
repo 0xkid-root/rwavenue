@@ -4,12 +4,13 @@ import { ArrowLeft, Clock, Wallet, Repeat, CreditCard, Check, X, ExternalLink } 
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { mockAssets } from '../data/mockData';
+import { useMockDataStore } from '@/store/mockDataStore';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 const AssetDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const asset = mockAssets.find(a => a.id === id);
+  const { assets } = useMockDataStore();
+  const asset = assets.find(a => a.id === id);
 
   if (!asset) {
     return (
@@ -29,7 +30,7 @@ const AssetDetailPage = () => {
     price, 
     imageUrl, 
     isVerified, 
-    validator, 
+    validation,
     description,
     specifications,
     listingType,
@@ -37,7 +38,7 @@ const AssetDetailPage = () => {
   } = asset;
 
   // Mock related assets (just using other assets from the mock data)
-  const relatedAssets = mockAssets
+  const relatedAssets = assets
     .filter(a => a.category === category && a.id !== id)
     .slice(0, 3);
 
@@ -45,7 +46,7 @@ const AssetDetailPage = () => {
     <div className="bg-neutral-50 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className="mb-6 mt-6">
           <Link to="/marketplace" className="flex items-center text-neutral-600 hover:text-primary-800 transition-colors">
             <ArrowLeft size={16} className="mr-1" />
             Back to Marketplace
@@ -129,6 +130,24 @@ const AssetDetailPage = () => {
                 )}
               </div>
 
+              {/* Validator Info */}
+              {validation?.validatedBy && (
+                <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-2">Validator</h3>
+                  <div className="flex items-center">
+                    <div className="bg-primary-100 p-2 rounded-full mr-3">
+                      <Check size={16} className="text-primary-800" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{validation.validatedBy}</p>
+                      <p className="text-sm text-neutral-600">
+                        Validated on {validation.validatedAt ? formatDate(validation.validatedAt.toISOString()) : 'Pending'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                 {listingType === 'auction' && (
@@ -151,13 +170,6 @@ const AssetDetailPage = () => {
                     <Button variant="secondary" fullWidth>View Details</Button>
                   </>
                 )}
-                
-                {listingType === 'lend' && (
-                  <>
-                    <Button fullWidth>View Terms</Button>
-                    <Button variant="secondary" fullWidth>Make Offer</Button>
-                  </>
-                )}
               </div>
 
               {/* Description */}
@@ -165,24 +177,6 @@ const AssetDetailPage = () => {
                 <h3 className="text-lg font-semibold mb-2">Description</h3>
                 <p className="text-neutral-700">{description}</p>
               </div>
-
-              {/* Validator Info */}
-              {validator && (
-                <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-2">Validator</h3>
-                  <div className="flex items-center">
-                    <div className="bg-primary-100 p-2 rounded-full mr-3">
-                      <Check size={16} className="text-primary-800" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{validator}</p>
-                      <p className="text-sm text-neutral-600">
-                        Validated on {formatDate('2025-01-15T00:00:00Z')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Asset Specifications */}
               {specifications && (

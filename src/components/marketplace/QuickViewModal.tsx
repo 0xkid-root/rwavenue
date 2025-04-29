@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { X, Check } from 'lucide-react';
 import { Asset } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 interface QuickViewModalProps {
   asset: Asset | null;
@@ -9,7 +10,14 @@ interface QuickViewModalProps {
 }
 
 export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
+  const navigate = useNavigate();
+  
   if (!asset) return null;
+
+  const handleViewDetails = () => {
+    onClose();
+    navigate(`/asset/${asset.id}`);
+  };
 
   return (
     <motion.div
@@ -111,7 +119,7 @@ export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
                 ) : (
                   <Button variant="secondary" fullWidth>View Terms</Button>
                 )}
-                <Button variant="outline" fullWidth onClick={() => window.location.href = `/asset/${asset.id}`}>
+                <Button variant="outline" fullWidth onClick={handleViewDetails}>
                   View Full Details
                 </Button>
               </div>

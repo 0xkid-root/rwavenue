@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Upload, Shield, Camera, X } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/Button';
+import useIPFSUpload from "@/hooks/useIPFSUpload";
 import { useNotificationStore } from '@/store/notificationStore';
 import { mockValidators } from '@/data/mockData';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   title: string;
@@ -34,6 +36,7 @@ export default function TokenizePage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const { uploadAssetsCreation, loading: ipfsLoading } = useIPFSUpload();
 
   const {
     getRootProps: getImageRootProps,
@@ -68,8 +71,21 @@ export default function TokenizePage() {
 
   const handleSubmit = async () => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setStep(3); // Ensure we're on the final step
+      
+      // Show loading notification
+      toast.loading('Uploading your asset to IPFS...', {
+        id: 'ipfs-upload'
+      });
+
+      // Upload to IPFS
+      const ipfsResults = await uploadAssetsCreation(formData);
+      console.log('IPFS Upload Results:', ipfsResults);
+
+      // Show success notification
+      toast.success('Asset uploaded successfully!', {
+        id: 'ipfs-upload'
+      });
 
       addNotification({
         type: 'success',
@@ -79,6 +95,13 @@ export default function TokenizePage() {
 
       navigate('/dashboard');
     } catch (error) {
+      console.error('Submission error:', error);
+      
+      // Show error notification
+      toast.error('Failed to upload asset', {
+        id: 'ipfs-upload'
+      });
+
       addNotification({
         type: 'error',
         title: 'Submission Failed',
@@ -96,7 +119,7 @@ export default function TokenizePage() {
   return (
     <div className="container py-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Tokenize Your Asset</h1>
+        <h1 className="text-3xl font-bold mb-8">Tokenize hiii Your Asset</h1>
 
         {/* Progress Steps */}
         <div className="flex justify-between mb-12">
