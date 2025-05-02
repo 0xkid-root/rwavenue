@@ -4,9 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prepare": "husky install",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
+    "@ethersproject/providers": "^5.8.0",
     "@faker-js/faker": "^8.4.1",
     "@headlessui/react": "^1.7.18",
     "clsx": "^2.1.0",
