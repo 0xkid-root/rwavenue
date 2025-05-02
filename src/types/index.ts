@@ -5,43 +5,68 @@ export type TokenizationType = 'fractional' | 'whole';
 
 export type UserRole = 'buyer' | 'seller' | 'validator' | 'admin';
 export type KYCStatus = 'pending' | 'verified' | 'rejected';
+export type RiskLevel = 'low' | 'medium' | 'high';
+
+export interface KYCData {
+  user: string;
+  status: number; // KYCStatus enum value
+  identityId: string;
+  idVerified: boolean;
+  addressVerified: boolean;
+  governmentId: string; // IPFS URI or hash
+  proofOfAddress: string; // IPFS URI or hash
+  additionalDocs: string[]; // Additional document URIs
+  nationality: string;
+  riskLevel: number; // RiskLevel enum value
+  verificationDate?: Date;
+  lastReviewDate: Date;
+  verifiedBy: string;
+}
+
+export interface Listing {
+  id: string;
+  assetId: string;
+  seller: string;
+  paymentToken: string; // address(0) for ETH
+  price: string;
+  tokenAmount: string;
+  listingType: number; // ListingType enum value
+  active: boolean;
+  createdAt: Date;
+  auctionEndTime?: Date;
+}
 
 export interface Asset {
   id: string;
+  owner: string;
   title: string;
   description: string;
-  category: AssetCategory;
-  status: AssetStatus;
-  imageUrl: string;
+  category: string;
+  status: number; // AssetStatus enum value
+  price: string;
+  tokenizationType: number; // TokenizationType enum value
+  totalTokens: string;
+  availableTokens: string;
+  pricePerToken: string;
+  listingType: number; // ListingType enum value
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  auctionEndTime?: Date;
+  royaltyReceiver: string;
+  royaltyFraction: number;
+  
+  // UI-specific fields (not in contract)
+  imageUrl?: string;
   images?: string[];
   videos?: string[];
   documents?: AssetDocument[];
-  price: {
-    amount: number;
-    currency: string;
-  };
-  tokenization: {
-    type: TokenizationType;
-    totalTokens: number;
-    availableTokens: number;
-    pricePerToken: number;
-  };
-  listingType: ListingType;
-  isVerified: boolean;
   location?: AssetLocation;
   specifications?: Record<string, string>;
-  owner: {
-    id: string;
-    name: string;
-    rating?: number;
-  };
   validation?: AssetValidation;
-  createdAt: Date;
-  updatedAt: Date;
-  auctionEndTime?: string;
-  views: number;
-  likes: number;
-  value: number;
+  views?: number;
+  likes?: number;
+  value?: number;
 }
 
 export interface AssetDocument {
