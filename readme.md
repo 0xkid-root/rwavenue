@@ -15,7 +15,7 @@ RWAvenue is an innovative decentralized marketplace platform developed for the P
 **Process**:
 - Asset owners submit ownership proof (e.g., deeds, certificates)
 - Documentation verification process
-- Smart contracts mint ERC-721/ERC-1155 tokens with verified metadata
+- Smart contracts mint ERC-3643 tokens with verified metadata
 
 **Benefit**: Ensures reliable asset digitization with blockchain verification.
 
