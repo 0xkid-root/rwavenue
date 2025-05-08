@@ -221,6 +221,8 @@ export interface Filter {
   sort: 'newest' | 'price-low-high' | 'price-high-low' | 'ending-soon';
 }
 
+export type { Transaction, TransactionType } from './transaction';
+
 export interface AssetFilter {
   category?: AssetCategory;
   priceRange?: [number, number];
