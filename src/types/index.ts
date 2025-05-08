@@ -169,6 +169,7 @@ export interface AssetDocument {
   id: string;
   type: DocumentType;
   uri: string; // IPFS URI
+  file?: File; // For file upload operations
   description?: string;
   name: string;
   verified: boolean;
