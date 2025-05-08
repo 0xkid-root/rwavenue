@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useMockDataStore } from '@/store/mockDataStore';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from '@ethersproject/bignumber';
 
-// Define types (aligned with AssetExplorerPage.tsx)
+// Define types (aligned with AssetExplorerPage.tsx, adjusted for store)
 type AssetCategory = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate' | 'vehicles';
 type AssetStatus = 'listed' | 'sold' | 'pending';
 type TokenizationType = 'fractional' | 'whole';
@@ -19,7 +19,7 @@ interface Asset {
   description: string;
   category: AssetCategory;
   status: AssetStatus;
-  images: string[];
+  imageUrl: string; // Adjusted to match likely store data
   price: BigNumber;
   tokenizationType: TokenizationType;
   totalTokens: number;
@@ -40,7 +40,7 @@ interface Asset {
 
 // Simplified formatters (replace with actual implementations if different)
 const formatCurrency = (amount: BigNumber, currency: string = 'USD') => {
-  return `${currency} ${amount.toFormat(2)}`;
+  return `${currency} ${amount.toString()}`; // Simplified for ethers BigNumber
 };
 
 const formatDate = (timestamp: number) => {
@@ -56,7 +56,7 @@ const formatDate = (timestamp: number) => {
 const AssetDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { assets } = useMockDataStore();
-  const asset = id ? assets.find(a => a.id === Number(id)) : undefined;
+  const asset = id ? assets.find((a: Asset) => a.id === Number(id)) : undefined;
 
   if (!asset || !id) {
     return (
@@ -74,7 +74,7 @@ const AssetDetailPage = () => {
     title, 
     category, 
     price, 
-    images, 
+    imageUrl, 
     description,
     listingType,
     auctionEndTime
@@ -82,7 +82,7 @@ const AssetDetailPage = () => {
 
   // Mock related assets
   const relatedAssets = assets
-    .filter(a => a.category === category && a.id !== Number(id))
+    .filter((a: Asset) => a.category === category && a.id !== Number(id))
     .slice(0, 3);
 
   return (
@@ -106,18 +106,18 @@ const AssetDetailPage = () => {
             >
               <div className="relative rounded-lg overflow-hidden">
                 <img
-                  src={images[0]}
+                  src={imageUrl}
                   alt={title}
                   className="w-full h-96 object-cover"
                 />
               </div>
 
-              {/* Additional images */}
+              {/* Additional images (mocked as same image) */}
               <div className="grid grid-cols-4 gap-2 mt-4">
-                {images.slice(0, 4).map((img, i) => (
+                {[0, 1, 2, 3].map((i: number) => (
                   <div key={i} className="aspect-square rounded-md overflow-hidden">
                     <img
-                      src={img}
+                      src={imageUrl}
                       alt={`${title} view ${i + 1}`}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
@@ -218,7 +218,7 @@ const AssetDetailPage = () => {
           <div className="mt-12">
             <h3 className="text-2xl font-bold text-primary-800 mb-6">Related Assets</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedAssets.map(relatedAsset => (
+              {relatedAssets.map((relatedAsset: Asset) => (
                 <Link 
                   key={relatedAsset.id} 
                   to={`/asset/${relatedAsset.id}`}
@@ -227,7 +227,7 @@ const AssetDetailPage = () => {
                   <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <div className="relative h-48">
                       <img
-                        src={relatedAsset.images[0]}
+                        src={relatedAsset.imageUrl}
                         alt={relatedAsset.title}
                         className="w-full h-full object-cover"
                       />
