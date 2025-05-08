@@ -33,7 +33,7 @@ const validatorApi = {
   // Get all validators
   getAllValidators: async (): Promise<Validator[]> => {
     const response = await axios.get(`${API_BASE_URL}/validators`);
-    return response.data;
+    return response.data as Validator[];
   },
 
   // Get validators by category
@@ -41,13 +41,13 @@ const validatorApi = {
     const response = await axios.get(`${API_BASE_URL}/validators`, {
       params: { category }
     });
-    return response.data;
+    return response.data as Validator[];
   },
 
   // Get validator details
   getValidatorDetails: async (validatorId: string): Promise<Validator> => {
     const response = await axios.get(`${API_BASE_URL}/validators/${validatorId}`);
-    return response.data;
+    return response.data as Validator;
   },
 
   // Submit validation request
@@ -56,19 +56,19 @@ const validatorApi = {
       assetId,
       validatorId
     });
-    return response.data;
+    return response.data as ValidationRequest;
   },
 
   // Get validation request status
   getValidationRequestStatus: async (requestId: string): Promise<ValidationRequest> => {
     const response = await axios.get(`${API_BASE_URL}/validation-requests/${requestId}`);
-    return response.data;
+    return response.data as ValidationRequest;
   },
 
   // Get validator's validation history
   getValidatorHistory: async (validatorId: string): Promise<ValidationRequest[]> => {
     const response = await axios.get(`${API_BASE_URL}/validators/${validatorId}/history`);
-    return response.data;
+    return response.data as ValidationRequest[];
   },
 
   // Update validation request
@@ -80,7 +80,7 @@ const validatorApi = {
       `${API_BASE_URL}/validation-requests/${requestId}`,
       updateData
     );
-    return response.data;
+    return response.data as ValidationRequest;
   },
 
   // Get validator availability
@@ -89,7 +89,7 @@ const validatorApi = {
     nextAvailableSlot?: string;
   }> => {
     const response = await axios.get(`${API_BASE_URL}/validators/${validatorId}/availability`);
-    return response.data;
+    return response.data as { available: boolean; nextAvailableSlot?: string };
   },
 
   // Get validator fees
@@ -101,7 +101,7 @@ const validatorApi = {
     const response = await axios.get(`${API_BASE_URL}/validators/${validatorId}/fees`, {
       params: { category: assetCategory }
     });
-    return response.data;
+    return response.data as { amount: number; currency: string; estimatedTime: string };
   }
 };
 

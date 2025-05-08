@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatedLogo } from '../AnimatedLogo';
-import { Wallet, Twitter, Instagram, Github, Send } from 'lucide-react';
+import {  Twitter, Instagram, Github, Send } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { AuthModal } from '../AuthModal'; // Assuming AuthModal is implemented
 

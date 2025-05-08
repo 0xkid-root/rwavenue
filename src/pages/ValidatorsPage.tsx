@@ -5,6 +5,7 @@ import { ValidatorCard } from '../components/ValidatorCard';
 import { Button } from '../components/ui/Button';
 import { useValidatorStore } from '../store/validatorStore';
 import { AssetCategory } from '../types';
+import { ValidatorProfile } from '../types/validator';
 import { toast } from '@/hooks/use-toast';
 import { ethers } from 'ethers';
 
@@ -145,16 +146,39 @@ const ValidatorsPage = () => {
                 className="bg-white rounded-xl p-6 h-64 animate-pulse"
               />
             ))
-          ) : validators.map((validator, index) => (
-            <motion.div
-              key={validator.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.3 }}
-            >
-              <ValidatorCard validator={validator} />
-            </motion.div>
-          ))}
+          ) : validators.map((validator, index) => {
+            // Create a ValidatorProfile object from the validator data
+            const validatorProfile: ValidatorProfile = {
+              id: validator.id,
+              name: validator.name,
+              avatar: validator.avatar || '',
+              expertise: validator.expertise || [],
+              jurisdiction: validator.jurisdiction || '',
+              licenses: [], // Not available in Validator type, using empty array
+              reputation: validator.reputation || 0,
+              validationCount: validator.validationCount || 0,
+              availableForValidation: validator.availability || false, // Map from availability
+              fees: {
+                base: validator.verificationFee?.amount || 0,
+                currency: validator.verificationFee?.currency || 'USD'
+              },
+              languages: ['English'], // Default language
+              responseTime: typeof validator.responseTime === 'string' ? 
+                parseInt(validator.responseTime) : 24, // Convert string to number if needed
+              contactInfo: { email: '' } // Default contact info
+            };
+            
+            return (
+              <motion.div
+                key={validator.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.3 }}
+              >
+                <ValidatorCard validator={validatorProfile} />
+              </motion.div>
+            );
+          })}
         </div>
         
         {/* Become a Validator CTA */}

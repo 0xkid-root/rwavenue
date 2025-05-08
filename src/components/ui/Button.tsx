@@ -40,6 +40,19 @@ export const Button = ({
   const widthClass = fullWidth ? 'w-full' : '';
   const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
+  // Convert icon to a string representation if it's a React element
+  const renderIcon = () => {
+    if (!icon) return null;
+    
+    // If icon is a React element, we need to clone it to avoid rendering issues
+    if (React.isValidElement(icon)) {
+      return React.cloneElement(icon as React.ReactElement);
+    }
+    
+    // Otherwise, just return the icon
+    return icon;
+  };
+
   return (
     <motion.button
       type={type}
@@ -49,9 +62,17 @@ export const Button = ({
       whileTap={{ scale: disabled ? 1 : 0.98 }}
       whileHover={{ scale: disabled ? 1 : 1.02 }}
     >
-      {icon && iconPosition === 'left' && <span className="mr-2">{icon}</span>}
+      {icon && iconPosition === 'left' && (
+        <span className="mr-2 inline-flex items-center">
+          {renderIcon()}
+        </span>
+      )}
       {children}
-      {icon && iconPosition === 'right' && <span className="ml-2">{icon}</span>}
+      {icon && iconPosition === 'right' && (
+        <span className="ml-2 inline-flex items-center">
+          {renderIcon()}
+        </span>
+      )}
     </motion.button>
   );
 };

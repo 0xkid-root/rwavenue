@@ -7,10 +7,6 @@ import { AnimatedLogo } from '../AnimatedLogo';
 import { useAuthStore } from '@/store/authStore';
 import { AuthModal } from '../AuthModal';
 
-// Assuming AnimatedLogoProps is defined elsewhere and includes className
-interface AnimatedLogoProps {
-  className?: string;
-}
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,7 +15,7 @@ export const Header = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout, loading } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,7 +93,9 @@ export const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <AnimatedLogo className="w-32" />
+              <div className="w-32">
+                <AnimatedLogo />
+              </div>
             </Link>
           </div>
 

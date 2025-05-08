@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Package, Layers, Shield, Home, Settings, User, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package, Layers, Shield, Home,  User, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { AnimatedLogo } from '../AnimatedLogo';
 

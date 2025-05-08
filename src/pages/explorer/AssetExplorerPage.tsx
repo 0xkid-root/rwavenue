@@ -14,28 +14,30 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { AssetCard } from '@/components/AssetCard';
 import BigNumber from 'bignumber.js';
+import { Asset as ImportedAsset, ListingType as ImportedListingType, AssetCategory as ImportedAssetCategory } from '@/types';
 
-// Define types
-type AssetCategory = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate' | 'vehicles';
-type AssetStatus = 'listed' | 'sold' | 'pending';
-type TokenizationType = 'fractional' | 'whole';
-type ListingType = 'auction' | 'fixed';
+// Define local types
+type LocalAssetCategory = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate' | 'vehicles';
+type LocalAssetStatus = 'listed' | 'sold' | 'pending';
+type LocalTokenizationType = 'fractional' | 'whole';
+type LocalListingType = 'auction' | 'fixed';
 
-interface Asset {
+// Local asset interface for the explorer page
+interface ExplorerAsset {
   id: number;
   title: string;
   description: string;
-  category: AssetCategory;
-  status: AssetStatus;
+  category: LocalAssetCategory;
+  status: LocalAssetStatus;
   images: string[];
   price: BigNumber;
-  tokenizationType: TokenizationType;
+  tokenizationType: LocalTokenizationType;
   totalTokens: number;
   availableTokens: number;
   pricePerToken: number;
   royaltyReceiver: string;
   royaltyPercentage: number;
-  listingType: ListingType;
+  listingType: LocalListingType;
   owner: { id: string; name: string; rating: number };
   createdAt: number;
   updatedAt: number;
@@ -59,7 +61,7 @@ interface FilterPanelProps {
 }
 
 // Mock data for assets
-const mockAssets: Asset[] = [
+const mockAssets: ExplorerAsset[] = [
   {
     id: 1,
     title: 'Luxury Watch Collection',
@@ -230,7 +232,7 @@ const mockAssets: Asset[] = [
     description: 'Premium yacht with modern amenities',
     category: 'vehicles',
     status: 'listed',
-    images: ['https://images.unsplash.com/photo-1504851149312-7a075b496cc7'],
+    images: ['https://images.unsplash.com/photo-1504851149312-f24b0cae1224'],
     price: new BigNumber(5000000),
     tokenizationType: 'fractional',
     totalTokens: 10000,
@@ -257,7 +259,7 @@ const BuyModal = ({
   onClose, 
   onConfirmPurchase 
 }: { 
-  asset: Asset | null; 
+  asset: ExplorerAsset | null; 
   isOpen: boolean; 
   onClose: () => void; 
   onConfirmPurchase: () => Promise<void>; 
@@ -526,10 +528,10 @@ const AssetExplorerPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<ExplorerAsset | null>(null);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [filteredAssets, setFilteredAssets] = useState<Asset[]>(mockAssets);
+  const [filteredAssets, setFilteredAssets] = useState<ExplorerAsset[]>(mockAssets);
 
   // Use mock data directly
   const assets = mockAssets;
@@ -587,7 +589,7 @@ const AssetExplorerPage = () => {
     }
   };
 
-  const handleBuyClick = (asset: Asset) => {
+  const handleBuyClick = (asset: ExplorerAsset) => {
     setSelectedAsset(asset);
     setIsBuyModalOpen(true);
   };
@@ -720,7 +722,7 @@ const AssetExplorerPage = () => {
               {filteredAssets.map((asset) => (
                 <AssetCard
                   key={asset.id}
-                  asset={asset}
+                  asset={convertToImportedAsset(asset)}
                   onBuyClick={handleBuyClick}
                 />
               ))}
@@ -739,5 +741,27 @@ const AssetExplorerPage = () => {
     </div>
   );
 };
+
+// Helper function to convert ExplorerAsset to ImportedAsset
+function convertToImportedAsset(asset: ExplorerAsset): ImportedAsset {
+  return {
+    id: asset.id,
+    title: asset.title,
+    description: asset.description,
+    category: asset.category as unknown as ImportedAssetCategory,
+    price: asset.price,
+    tokenizationType: asset.tokenizationType === 'fractional' ? 0 : 1,
+    totalTokens: asset.totalTokens,
+    pricePerToken: new BigNumber(asset.pricePerToken),
+    listingType: asset.listingType === 'auction' ? ImportedListingType.AUCTION : ImportedListingType.FIXED_PRICE,
+    auctionEndTime: asset.auctionEndTime || 0,
+    royaltyReceiver: asset.royaltyReceiver,
+    royaltyFraction: asset.royaltyPercentage,
+    creator: asset.owner.id,
+    status: asset.status === 'listed' ? 0 : asset.status === 'sold' ? 1 : 2,
+    createdAt: asset.createdAt,
+    updatedAt: asset.updatedAt
+  } as ImportedAsset;
+}
 
 export default AssetExplorerPage;

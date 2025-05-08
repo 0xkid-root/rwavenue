@@ -10,11 +10,11 @@ interface CategoryFilterProps {
 export const CategoryFilter = ({ selectedCategory, onCategoryChange }: CategoryFilterProps) => {
   const categories: { value: AssetCategory | undefined; label: string; icon: string }[] = [
     { value: undefined, label: 'All', icon: '🌐' },
-    { value: 'watches', label: 'Watches', icon: '⌚' },
-    { value: 'art', label: 'Art', icon: '🎨' },
-    { value: 'collectibles', label: 'Collectibles', icon: '🏆' },
-    { value: 'jewelry', label: 'Jewelry', icon: '💎' },
-    { value: 'real-estate', label: 'Real Estate', icon: '🏠' },
+    { value: AssetCategory.WATCHES, label: 'Watches', icon: '⌚' },
+    { value: AssetCategory.ART, label: 'Art', icon: '🎨' },
+    { value: AssetCategory.COLLECTIBLES, label: 'Collectibles', icon: '🏆' },
+    { value: AssetCategory.JEWELRY, label: 'Jewelry', icon: '💎' },
+    { value: AssetCategory.REAL_ESTATE, label: 'Real Estate', icon: '🏠' },
   ];
 
   return (

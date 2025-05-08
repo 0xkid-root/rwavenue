@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { create } from 'ipfs-http-client';
+import { create as createIPFSClient } from 'ipfs-http-client';
 
 const INFURA_PROJECT_ID = process.env.REACT_APP_INFURA_PROJECT_ID;
 const INFURA_PROJECT_SECRET = process.env.REACT_APP_INFURA_PROJECT_SECRET;
-const INFURA_IPFS_ENDPOINT = 'https://ipfs.infura.io:5001';
+//const INFURA_IPFS_ENDPOINT = 'https://ipfs.infura.io:5001';
 
 // Initialize IPFS client with Infura
-const auth = 'Basic ' + Buffer.from(INFURA_PROJECT_ID + ':' + INFURA_PROJECT_SECRET).toString('base64');
+const auth = 'Basic ' + Buffer.from((INFURA_PROJECT_ID || '') + ':' + (INFURA_PROJECT_SECRET || '')).toString('base64');
 
-const client = create({
+const client = createIPFSClient({
   host: 'ipfs.infura.io',
   port: 5001,
   protocol: 'https',

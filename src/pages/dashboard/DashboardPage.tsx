@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Package, DollarSign, Clock, AlertCircle, Plus, Search, Filter } from 'lucide-react';
+import { Package, DollarSign, Clock, AlertCircle, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useMockDataStore } from '@/store/mockDataStore';
 import { formatCurrency } from '@/utils/format';
@@ -130,7 +130,7 @@ export default function DashboardPage() {
             >
               <div className="aspect-video relative">
                 <img 
-                  src={asset.imageUrl} 
+                  src={`/assets/images/${asset.id}.jpg`} 
                   alt={asset.title}
                   className="w-full h-full object-cover"
                 />

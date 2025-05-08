@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { X, Check } from 'lucide-react';
-import { Asset } from '@/types';
+import { Asset, ListingType, AssetStatus } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '@/utils/formatters';
 
 interface QuickViewModalProps {
   asset: Asset | null;
@@ -45,11 +46,11 @@ export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
             <div className="p-6 md:p-8">
               <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
                 <img
-                  src={asset.imageUrl}
+                  src={`/assets/images/${asset.id}.jpg`}
                   alt={asset.title}
                   className="w-full h-full object-cover"
                 />
-                {asset.isVerified && (
+                {asset.status === AssetStatus.VALIDATED && (
                   <div className="absolute top-4 right-4 bg-white rounded-full p-1 shadow-md">
                     <Check size={16} className="text-green-500" />
                   </div>
@@ -58,7 +59,7 @@ export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
               <div className="grid grid-cols-4 gap-2">
                 <div className="aspect-square rounded-md overflow-hidden">
                   <img
-                    src={asset.imageUrl}
+                    src={`/assets/images/${asset.id}.jpg`}
                     alt="Thumbnail"
                     className="w-full h-full object-cover"
                   />
@@ -75,15 +76,9 @@ export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
               
               <div className="mb-6">
                 <p className="text-3xl font-bold text-primary-800">
-                  {asset.price.currency === 'USDT' ? 
-                    `${asset.price.amount.toLocaleString()} USDT` :
-                    new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: asset.price.currency,
-                      maximumFractionDigits: 0,
-                    }).format(asset.price.amount)}
+                  {formatCurrency(parseFloat(asset.price.toString()), 'ETH')}
                 </p>
-                {asset.listingType === 'auction' && asset.auctionEndTime && (
+                {asset.listingType === ListingType.AUCTION && asset.auctionEndTime && (
                   <p className="text-sm text-neutral-500 mt-1">
                     Auction ends: {new Date(asset.auctionEndTime).toLocaleDateString()}
                   </p>
@@ -95,26 +90,26 @@ export const QuickViewModal = ({ asset, onClose }: QuickViewModalProps) => {
                 <p className="text-neutral-600">{asset.description || 'No description available.'}</p>
               </div>
               
-              {asset.specifications && (
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-2">Specifications</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(asset.specifications).map(([key, value]) => (
-                      <div key={key} className="flex flex-col">
-                        <span className="text-xs text-neutral-500">{key}</span>
-                        <span className="text-sm">{value}</span>
-                      </div>
-                    ))}
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">Details</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-neutral-500">Category</span>
+                    <span className="text-sm">{asset.category}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-neutral-500">Created</span>
+                    <span className="text-sm">{new Date(asset.createdAt * 1000).toLocaleDateString()}</span>
                   </div>
                 </div>
-              )}
+              </div>
               
               <div className="flex flex-col gap-3">
-                {asset.listingType === 'auction' ? (
+                {asset.listingType === ListingType.AUCTION ? (
                   <Button fullWidth>Place Bid</Button>
-                ) : asset.listingType === 'fixed' ? (
+                ) : asset.listingType === ListingType.FIXED_PRICE ? (
                   <Button fullWidth>Buy Now</Button>
-                ) : asset.listingType === 'swap' ? (
+                ) : asset.listingType === ListingType.SWAP ? (
                   <Button variant="secondary" fullWidth>Swap Asset</Button>
                 ) : (
                   <Button variant="secondary" fullWidth>View Terms</Button>

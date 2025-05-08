@@ -9,7 +9,7 @@ import { useNotificationStore } from '@/store/notificationStore';
 import { mockValidators } from '@/data/mockData';
 import { toast } from 'react-hot-toast';
 
-interface FormData {
+export interface FormData {
   title: string;
   description: string;
   category: string;
@@ -36,7 +36,7 @@ export default function TokenizePage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
-  const { uploadAssetsCreation, loading: ipfsLoading } = useIPFSUpload();
+  const { uploadAssetsCreation } = useIPFSUpload();
 
   const {
     getRootProps: getImageRootProps,

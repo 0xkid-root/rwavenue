@@ -5,7 +5,7 @@ export const mockValidators: Validator[] = [
   {
     id: '1',
     name: 'John Anderson',
-    expertise: ['watches', 'jewelry'],
+    expertise: [AssetCategory.WATCHES, AssetCategory.JEWELRY],
     jurisdiction: 'United States',
     validationCount: 156,
     reputation: 4.8,
@@ -20,7 +20,7 @@ export const mockValidators: Validator[] = [
   {
     id: '2',
     name: 'Sarah Chen',
-    expertise: ['art', 'collectibles'],
+    expertise: [AssetCategory.ART, AssetCategory.COLLECTIBLES],
     jurisdiction: 'Singapore',
     validationCount: 243,
     reputation: 4.9,
@@ -35,7 +35,7 @@ export const mockValidators: Validator[] = [
   {
     id: '3',
     name: 'Michael Roberts',
-    expertise: ['real-estate'],
+    expertise: [AssetCategory.REAL_ESTATE],
     jurisdiction: 'United Kingdom',
     validationCount: 89,
     reputation: 4.7,
@@ -50,7 +50,7 @@ export const mockValidators: Validator[] = [
   {
     id: '4',
     name: 'Emily Thompson',
-    expertise: ['jewelry', 'art'],
+    expertise: [AssetCategory.JEWELRY, AssetCategory.ART],
     jurisdiction: 'Canada',
     validationCount: 167,
     reputation: 4.9,
@@ -65,7 +65,7 @@ export const mockValidators: Validator[] = [
   {
     id: '5',
     name: 'David Kim',
-    expertise: ['watches', 'collectibles'],
+    expertise: [AssetCategory.WATCHES, AssetCategory.COLLECTIBLES],
     jurisdiction: 'South Korea',
     validationCount: 198,
     reputation: 4.8,
@@ -80,7 +80,7 @@ export const mockValidators: Validator[] = [
   {
     id: '6',
     name: 'Maria Garcia',
-    expertise: ['art', 'collectibles', 'jewelry'],
+    expertise: [AssetCategory.ART, AssetCategory.COLLECTIBLES, AssetCategory.JEWELRY],
     jurisdiction: 'Spain',
     validationCount: 134,
     reputation: 4.7,

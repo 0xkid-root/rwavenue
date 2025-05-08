@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Asset } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { formatCurrency } from '@/utils/formatters';
 
 interface BuyModalProps {
   asset: Asset | null;
@@ -40,7 +41,7 @@ export const BuyModal = ({ asset, onClose, onConfirmPurchase }: BuyModalProps) =
           
           <div className="flex items-center gap-4 mb-6">
             <img
-              src={asset.imageUrl}
+              src={`/assets/images/${asset.id}.jpg`}
               alt={asset.title}
               className="w-20 h-20 object-cover rounded-lg"
             />
@@ -54,13 +55,7 @@ export const BuyModal = ({ asset, onClose, onConfirmPurchase }: BuyModalProps) =
             <div className="flex justify-between mb-2">
               <span className="text-neutral-600">Price</span>
               <span className="font-semibold">
-                {asset.price.currency === 'USDT' 
-                  ? `${asset.price.amount.toLocaleString()} USDT`
-                  : new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: asset.price.currency,
-                      maximumFractionDigits: 0,
-                    }).format(asset.price.amount)}
+                {formatCurrency(parseFloat(asset.price.toString()), 'ETH')}
               </span>
             </div>
             <div className="flex justify-between">

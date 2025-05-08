@@ -1,5 +1,5 @@
-import { ethers } from 'ethers';
-import type { Asset, AssetDetails, ListingDetails, KYCData } from '../types';
+
+import type { AssetDetails, ListingDetails, KYCData } from '../types';
 import { RWAvenueAPI } from './index';
 
 export class APIEndpoints {

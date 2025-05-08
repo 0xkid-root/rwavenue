@@ -1,5 +1,9 @@
 import axios from 'axios';
-import { type AxiosResponse, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+
+// Define types that match Axios interfaces
+type InternalAxiosRequestConfig = any;
+type AxiosResponse = any;
+type AxiosError = any;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 

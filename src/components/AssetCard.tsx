@@ -1,6 +1,5 @@
 import { Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Asset } from '../types';
+import { Asset, ListingType, AssetStatus } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { Badge } from './ui/Badge';
 import { Card } from './ui/Card';
@@ -13,15 +12,18 @@ interface AssetCardProps {
 }
 
 export const AssetCard = ({ asset, onQuickView, onBuyClick }: AssetCardProps) => {
-  const { title, category, price, imageUrl, isVerified, listingType, auctionEndTime } = asset;
+  const { title, category, price, auctionEndTime, status } = asset;
+  // Create a placeholder for image URL since it's not in the Asset interface
+  const imageUrl = `/assets/images/${asset.id}.jpg`; // Placeholder image path based on asset ID
+  const isVerified = status === AssetStatus.VALIDATED;
 
   const getActionButton = () => {
-    switch (listingType) {
-      case 'auction':
+    switch (asset.listingType) {
+      case ListingType.AUCTION:
         return <Button size="sm" fullWidth onClick={() => onQuickView?.(asset)}>Place Bid</Button>;
-      case 'fixed':
+      case ListingType.FIXED_PRICE:
         return <Button size="sm" fullWidth onClick={() => onBuyClick?.(asset)}>Buy Now</Button>;
-      case 'swap':
+      case ListingType.SWAP:
         return <Button size="sm" variant="secondary" fullWidth onClick={() => onQuickView?.(asset)}>Swap Asset</Button>;
       default:
         return <Button size="sm" fullWidth onClick={() => onQuickView?.(asset)}>View Details</Button>;
@@ -47,13 +49,13 @@ export const AssetCard = ({ asset, onQuickView, onBuyClick }: AssetCardProps) =>
           )}
           <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent">
             <Badge 
-              variant={listingType === 'auction' ? 'primary' : 
-                      listingType === 'fixed' ? 'success' : 
-                      listingType === 'swap' ? 'secondary' : 'error'}
+              variant={asset.listingType === ListingType.AUCTION ? 'primary' : 
+                      asset.listingType === ListingType.FIXED_PRICE ? 'success' : 
+                      asset.listingType === ListingType.SWAP ? 'secondary' : 'error'}
             >
-              {listingType === 'auction' ? 'Auction' : 
-               listingType === 'fixed' ? 'Buy Now' : 
-               listingType === 'swap' ? 'Swap' : 'View Details'}
+              {asset.listingType === ListingType.AUCTION ? 'Auction' : 
+               asset.listingType === ListingType.FIXED_PRICE ? 'Buy Now' : 
+               asset.listingType === ListingType.SWAP ? 'Swap' : 'View Details'}
             </Badge>
           </div>
         </div>
@@ -65,9 +67,9 @@ export const AssetCard = ({ asset, onQuickView, onBuyClick }: AssetCardProps) =>
           <div className="mt-auto">
             <div className="flex justify-between items-center mb-3">
               <span className="text-lg font-bold text-primary-800">
-                {formatCurrency(price.amount, price.currency)}
+                {formatCurrency(parseFloat(price.toString()), 'ETH')}
               </span>
-              {listingType === 'auction' && auctionEndTime && (
+              {asset.listingType === ListingType.AUCTION && auctionEndTime && (
                 <span className="text-xs text-neutral-500">
                   Ends: {new Date(auctionEndTime).toLocaleDateString()}
                 </span>

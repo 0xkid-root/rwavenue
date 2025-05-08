@@ -27,11 +27,11 @@ const conditions = [
 
 const categories: { value: AssetCategory | undefined; label: string }[] = [
   { value: undefined, label: 'All Categories' },
-  { value: 'watches', label: 'Watches' },
-  { value: 'art', label: 'Art' },
-  { value: 'collectibles', label: 'Collectibles' },
-  { value: 'jewelry', label: 'Jewels' },
-  { value: 'real-estate', label: 'Real Estate' },
+  { value: AssetCategory.WATCHES, label: 'Watches' },
+  { value: AssetCategory.ART, label: 'Art' },
+  { value: AssetCategory.COLLECTIBLES, label: 'Collectibles' },
+  { value: AssetCategory.JEWELRY, label: 'Jewels' },
+  { value: AssetCategory.REAL_ESTATE, label: 'Real Estate' },
 ];
 
 export const MarketplaceFilters = ({

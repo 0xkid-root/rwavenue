@@ -65,7 +65,7 @@ export const HeroSection = () => {
     setCurrentSlide((prev) => (prev + 1) % assetSlides.length);
   }, []);
 
-  const handleDotClick = useCallback((index) => {
+  const handleDotClick = useCallback((index: number) => {
     setIsAutoPlaying(false);
     setDirection(index > currentSlide ? 1 : -1);
     setCurrentSlide(index);
@@ -73,7 +73,7 @@ export const HeroSection = () => {
 
   // Animation variants - pure professional slide effect with proper timing
   const slideVariants = {
-    enter: (direction) => ({
+    enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
       opacity: 0,
       zIndex: 0
@@ -87,7 +87,7 @@ export const HeroSection = () => {
         opacity: { duration: 0.35, ease: 'easeInOut' }
       }
     },
-    exit: (direction) => ({
+    exit: (direction: number) => ({
       x: direction > 0 ? '-30%' : '30%',
       opacity: 0,
       zIndex: 0,

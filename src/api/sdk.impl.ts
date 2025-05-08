@@ -11,7 +11,7 @@ export class RWAvenueSDKImpl implements RWAvenueSDK {
     tokenAddress: string,
     kycAddress: string,
     marketplaceAddress: string,
-    provider: ethers.providers.Web3Provider,
+    //provider: ethers.providers.Web3Provider,
     signer: ethers.Signer
   ) {
     // Initialize contracts with addresses and ABI
@@ -46,7 +46,7 @@ export class RWAvenueSDKImpl implements RWAvenueSDK {
       royaltyReceiver,
       royaltyFraction
     );
-    const receipt = await tx.wait();
+    await tx.wait();
     // Extract assetId from event logs
     return 0; // Placeholder
   }
@@ -72,7 +72,7 @@ export class RWAvenueSDKImpl implements RWAvenueSDK {
       listingType,
       auctionEndTime
     );
-    const receipt = await tx.wait();
+     await tx.wait();
     // Extract listingId from event logs
     return 0; // Placeholder
   }

@@ -24,7 +24,6 @@ export class RWAvenueAPI {
       config.tokenAddress,
       config.kycAddress,
       config.marketplaceAddress,
-      this.provider!,
       this.signer!
     );
   }

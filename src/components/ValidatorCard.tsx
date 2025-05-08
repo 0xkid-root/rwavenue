@@ -1,12 +1,12 @@
 import React from 'react';
 import { Star } from 'lucide-react';
-import { Validator } from '../types';
+import { ValidatorProfile } from '../types/validator';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
 
 interface ValidatorCardProps {
-  validator: Validator;
+  validator: ValidatorProfile;
 }
 
 export const ValidatorCard = ({ validator }: ValidatorCardProps) => {
@@ -33,7 +33,7 @@ export const ValidatorCard = ({ validator }: ValidatorCardProps) => {
         <div className="mb-2">
           <span className="text-xs text-neutral-500">Expertise</span>
           <div className="flex flex-wrap gap-1 mt-1">
-            {expertise.map(exp => (
+            {expertise.map((exp: string) => (
               <Badge key={exp} variant="primary" className="capitalize">
                 {exp.replace('-', ' ')}
               </Badge>

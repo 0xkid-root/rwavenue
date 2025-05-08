@@ -1,4 +1,4 @@
-import { Asset, AssetStatus } from '@/types';
+import { Asset } from '@/types';
 
 // API response types
 export interface DashboardStats {

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Check, AlertCircle, Info } from 'lucide-react';
 import { useNotificationStore, NotificationType } from '@/store/notificationStore';
-import { Button } from './ui/Button';
+//import { Button } from './ui/Button';
 import { formatDistanceToNow } from 'date-fns';
 
 export const NotificationCenter = () => {

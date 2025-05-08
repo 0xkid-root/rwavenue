@@ -5,42 +5,16 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useMockDataStore } from '@/store/mockDataStore';
-import { BigNumber } from '@ethersproject/bignumber';
+import { ListingType } from '@/types';
+import { formatCurrency } from '@/utils/formatters';
 
-// Define types (aligned with AssetExplorerPage.tsx, adjusted for store)
-type AssetCategory = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate' | 'vehicles';
-type AssetStatus = 'listed' | 'sold' | 'pending';
-type TokenizationType = 'fractional' | 'whole';
-type ListingType = 'auction' | 'fixed' | 'swap';
+// Using imported types from the main types module
 
-interface Asset {
-  id: number;
-  title: string;
-  description: string;
-  category: AssetCategory;
-  status: AssetStatus;
-  imageUrl: string; // Adjusted to match likely store data
-  price: BigNumber;
-  tokenizationType: TokenizationType;
-  totalTokens: number;
-  availableTokens: number;
-  pricePerToken: number;
-  royaltyReceiver: string;
-  royaltyPercentage: number;
-  listingType: ListingType;
-  owner: { id: string; name: string; rating: number };
-  createdAt: number;
-  updatedAt: number;
-  auctionEndTime?: number;
-  views: number;
-  likes: number;
-  value: number;
-  tokenId: string;
-}
+// Using the imported types instead of defining a local interface
 
-// Simplified formatters (replace with actual implementations if different)
-const formatCurrency = (amount: BigNumber, currency: string = 'USD') => {
-  return `${currency} ${amount.toString()}`; // Simplified for ethers BigNumber
+// Helper function to get a placeholder image URL based on asset ID
+const getPlaceholderImageUrl = (assetId: number | string): string => {
+  return `/assets/placeholders/asset-${typeof assetId === 'number' ? assetId % 10 : parseInt(assetId) % 10}.jpg`;
 };
 
 const formatDate = (timestamp: number) => {
@@ -56,7 +30,7 @@ const formatDate = (timestamp: number) => {
 const AssetDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { assets } = useMockDataStore();
-  const asset = id ? assets.find((a: Asset) => a.id === Number(id)) : undefined;
+  const asset = id ? assets.find((a) => a.id === Number(id)) : undefined;
 
   if (!asset || !id) {
     return (
@@ -74,15 +48,18 @@ const AssetDetailPage = () => {
     title, 
     category, 
     price, 
-    imageUrl, 
     description,
     listingType,
-    auctionEndTime
+    auctionEndTime,
+    id: assetId
   } = asset;
+  
+  // Use placeholder for imageUrl since it doesn't exist on the Asset type
+  const imageUrl = getPlaceholderImageUrl(assetId);
 
   // Mock related assets
   const relatedAssets = assets
-    .filter((a: Asset) => a.category === category && a.id !== Number(id))
+    .filter((a) => a.category === category && a.id !== Number(id))
     .slice(0, 3);
 
   return (
@@ -138,13 +115,15 @@ const AssetDetailPage = () => {
                   <h1 className="text-3xl font-bold text-primary-800">{title}</h1>
                   <Badge 
                     variant={
-                      listingType === 'auction' ? 'primary' : 
-                      listingType === 'fixed' ? 'success' : 
-                      listingType === 'swap' ? 'secondary' : 'error'
+                      listingType === ListingType.AUCTION ? 'primary' : 
+                      listingType === ListingType.FIXED_PRICE ? 'success' : 
+                      'secondary'
                     }
                     className="capitalize"
                   >
-                    {listingType}
+                    {listingType === ListingType.AUCTION ? 'auction' : 
+                     listingType === ListingType.FIXED_PRICE ? 'fixed' : 
+                     'swap'}
                   </Badge>
                 </div>
                 <p className="text-neutral-600 capitalize">{category.replace('-', ' ')}</p>
@@ -153,13 +132,13 @@ const AssetDetailPage = () => {
               {/* Price and Auction Details */}
               <div className="my-6 p-4 bg-neutral-50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-neutral-600">Current {listingType === 'auction' ? 'Bid' : 'Price'}</span>
+                  <span className="text-neutral-600">Current {listingType === ListingType.AUCTION ? 'Bid' : 'Price'}</span>
                   <span className="text-2xl font-bold text-primary-800">
-                    {formatCurrency(price)}
+                    {formatCurrency(parseFloat(price.toString()), 'USD')}
                   </span>
                 </div>
                 
-                {listingType === 'auction' && auctionEndTime && (
+                {listingType === ListingType.AUCTION && auctionEndTime && (
                   <div className="flex items-center text-neutral-700">
                     <Clock size={16} className="mr-2" />
                     <span>
@@ -171,23 +150,38 @@ const AssetDetailPage = () => {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                {listingType === 'auction' && (
+                {listingType === ListingType.AUCTION && (
                   <>
                     <Button fullWidth>Place Bid</Button>
                     <Button variant="secondary" fullWidth>Set Auto-Bid</Button>
                   </>
                 )}
                 
-                {listingType === 'fixed' && (
+                {listingType === ListingType.FIXED_PRICE && (
                   <>
-                    <Button fullWidth icon={<Wallet size={16} />}>Buy Now</Button>
-                    <Button variant="secondary" fullWidth icon={<CreditCard size={16} />}>Make Offer</Button>
+                    <Button fullWidth>
+                      <span className="flex items-center">
+                        <Wallet size={16} className="mr-2" />
+                        Buy Now
+                      </span>
+                    </Button>
+                    <Button variant="secondary" fullWidth>
+                      <span className="flex items-center">
+                        <CreditCard size={16} className="mr-2" />
+                        Make Offer
+                      </span>
+                    </Button>
                   </>
                 )}
                 
-                {listingType === 'swap' && (
+                {listingType === ListingType.SWAP && (
                   <>
-                    <Button fullWidth icon={<Repeat size={16} />}>Swap Asset</Button>
+                    <Button fullWidth>
+                      <span className="flex items-center">
+                        <Repeat size={16} className="mr-2" />
+                        Swap Asset
+                      </span>
+                    </Button>
                     <Button variant="secondary" fullWidth>View Details</Button>
                   </>
                 )}
@@ -218,30 +212,34 @@ const AssetDetailPage = () => {
           <div className="mt-12">
             <h3 className="text-2xl font-bold text-primary-800 mb-6">Related Assets</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedAssets.map((relatedAsset: Asset) => (
-                <Link 
-                  key={relatedAsset.id} 
-                  to={`/asset/${relatedAsset.id}`}
-                  className="block"
-                >
-                  <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <div className="relative h-48">
-                      <img
-                        src={relatedAsset.imageUrl}
-                        alt={relatedAsset.title}
-                        className="w-full h-full object-cover"
-                      />
+              {relatedAssets.map((relatedAsset) => {
+                // Use placeholder for imageUrl
+                const relatedImageUrl = getPlaceholderImageUrl(relatedAsset.id);
+                return (
+                  <Link 
+                    key={relatedAsset.id} 
+                    to={`/asset/${relatedAsset.id}`}
+                    className="block"
+                  >
+                    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                      <div className="relative h-48">
+                        <img
+                          src={relatedImageUrl}
+                          alt={relatedAsset.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold truncate">{relatedAsset.title}</h4>
+                        <p className="text-neutral-500 text-sm capitalize">{relatedAsset.category.replace('-', ' ')}</p>
+                        <p className="text-primary-800 font-bold mt-2">
+                          {formatCurrency(parseFloat(relatedAsset.price.toString()), 'USD')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h4 className="font-semibold truncate">{relatedAsset.title}</h4>
-                      <p className="text-neutral-500 text-sm capitalize">{relatedAsset.category.replace('-', ' ')}</p>
-                      <p className="text-primary-800 font-bold mt-2">
-                        {formatCurrency(relatedAsset.price)}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

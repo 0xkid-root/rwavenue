@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import { useMockDataStore } from '@/store/mockDataStore';
 import { Button } from '@/components/ui/Button';
-import { AssetCategory, Asset } from '@/types';
+import { AssetCategory, Asset as ImportedAsset, ListingType, AssetStatus } from '@/types';
 import { CategoryFilter } from '@/components/marketplace/CategoryFilter';
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters';
 import { QuickViewModal } from '@/components/marketplace/QuickViewModal';
 import { AssetGrid } from '@/components/marketplace/AssetGrid';
-import { ethers } from 'ethers';
 
 const sortOptions = [
   { value: 'newest', label: 'Newest First' },
@@ -15,6 +14,33 @@ const sortOptions = [
   { value: 'price-high-low', label: 'Price: High to Low' },
   { value: 'ending-soon', label: 'Auction Ending Soon' },
 ] as const;
+
+// Helper function to convert store assets to imported assets
+const convertStoreAssetToImported = (storeAsset: any): ImportedAsset => {
+  return {
+    id: storeAsset.id,
+    title: storeAsset.title,
+    description: storeAsset.description,
+    category: storeAsset.category as AssetCategory,
+    price: storeAsset.price,
+    tokenizationType: storeAsset.tokenizationType,
+    totalTokens: storeAsset.totalTokens || 0,
+    pricePerToken: storeAsset.pricePerToken || storeAsset.price,
+    listingType: storeAsset.listingType === 'fixed' ? ListingType.FIXED_PRICE : 
+                storeAsset.listingType === 'auction' ? ListingType.AUCTION : 
+                ListingType.SWAP,
+    auctionEndTime: storeAsset.auctionEndTime || 0,
+    royaltyReceiver: storeAsset.royaltyReceiver || '',
+    royaltyFraction: storeAsset.royaltyPercentage || 0,
+    creator: storeAsset.owner?.id || '',
+    status: storeAsset.status === 'validated' ? AssetStatus.VALIDATED : 
+            storeAsset.status === 'rejected' ? AssetStatus.REJECTED : 
+            storeAsset.status === 'action_required' ? AssetStatus.ACTION_REQUIRED : 
+            AssetStatus.PENDING,
+    createdAt: typeof storeAsset.createdAt === 'object' ? storeAsset.createdAt.getTime() : storeAsset.createdAt,
+    updatedAt: typeof storeAsset.updatedAt === 'object' ? storeAsset.updatedAt.getTime() : storeAsset.updatedAt
+  };
+};
 
 export default function MarketplacePage() {
   const { assets, loading, loadMoreAssets, filterAssets } = useMockDataStore();
@@ -26,8 +52,8 @@ export default function MarketplacePage() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<typeof sortOptions[number]['value']>('newest');
-  const [quickViewAsset, setQuickViewAsset] = useState<Asset | null>(null);
-  const [filteredAssets, setFilteredAssets] = useState<Asset[]>(assets);
+  const [quickViewAsset, setQuickViewAsset] = useState<ImportedAsset | null>(null);
+  const [filteredAssets, setFilteredAssets] = useState<ImportedAsset[]>([]);
 
   useEffect(() => {
     // Start with all assets
@@ -47,10 +73,13 @@ export default function MarketplacePage() {
     // Finally apply sorting
     result = sortAssets(result, sortOption);
     
-    setFilteredAssets(result);
+    // Convert store assets to imported assets
+    const convertedAssets = result.map(convertStoreAssetToImported);
+    
+    setFilteredAssets(convertedAssets);
   }, [assets, searchQuery, selectedCategory, priceRange, verifiedOnly, sortOption, filterAssets]);
 
-  const sortAssets = (assetsToSort: Asset[], sortBy: typeof sortOptions[number]['value']) => {
+  const sortAssets = (assetsToSort: any[], sortBy: typeof sortOptions[number]['value']) => {
     switch (sortBy) {
       case 'price-low-high':
         return [...assetsToSort].sort((a, b) => a.price.toNumber() - b.price.toNumber());

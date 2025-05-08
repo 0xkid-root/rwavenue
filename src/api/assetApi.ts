@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FormData } from '@/pages/tokenize/TokenizePage';
+import type { FormData } from '@/pages/tokenize/TokenizePage';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
 
@@ -36,7 +36,7 @@ const assetApi = {
       },
     });
 
-    return response.data;
+    return response.data as IPFSResponse[];
   },
 
   // Create a new asset with metadata
@@ -59,7 +59,7 @@ const assetApi = {
     };
 
     const response = await axios.post(`${API_BASE_URL}/assets`, metadata);
-    return response.data;
+    return response.data as AssetCreationResponse;
   },
 
   // Get asset details
@@ -71,7 +71,7 @@ const assetApi = {
   // Get validation status
   getValidationStatus: async (assetId: string): Promise<ValidationResponse> => {
     const response = await axios.get(`${API_BASE_URL}/assets/${assetId}/validation`);
-    return response.data;
+    return response.data as ValidationResponse;
   },
 
   // Update asset metadata

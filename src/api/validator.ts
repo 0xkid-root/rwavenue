@@ -79,7 +79,9 @@ export const validatorApi = {
   // Document Management
   uploadDocument: async (taskId: string, document: AssetDocument): Promise<void> => {
     const formData = new FormData();
-    formData.append('document', document.file);
+    if (document.file) {
+      formData.append('document', document.file);
+    }
     formData.append('type', document.type);
     formData.append('description', document.description || '');
     
