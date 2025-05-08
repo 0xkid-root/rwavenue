@@ -1,181 +1,210 @@
-export type AssetCategory = 'real-estate' | 'art' | 'watches' | 'jewelry' | 'collectibles' | 'vehicles' | 'other';
-export type AssetStatus = 'pending' | 'validated' | 'rejected' | 'action_required';
-export type ListingType = 'fixed' | 'auction' | 'swap';
-export type TokenizationType = 'fractional' | 'whole';
+import { BigNumber } from 'ethers';
 
-export type UserRole = 'buyer' | 'seller' | 'validator' | 'admin';
-export type KYCStatus = 'pending' | 'verified' | 'rejected';
+// Enums for better type safety and consistency
+export enum AssetCategory {
+  REAL_ESTATE = 'real-estate',
+  ART = 'art',
+  WATCHES = 'watches',
+  JEWELRY = 'jewelry',
+  COLLECTIBLES = 'collectibles',
+  VEHICLES = 'vehicles',
+  OTHER = 'other'
+}
 
-export type AssetType = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate';
+export enum AssetStatus {
+  PENDING = 'pending',
+  VALIDATED = 'validated',
+  REJECTED = 'rejected',
+  ACTION_REQUIRED = 'action_required'
+}
+
+export enum ListingType {
+  FIXED_PRICE = 0,
+  AUCTION = 1,
+  SWAP = 2
+}
+
+export enum TokenizationType {
+  FRACTIONAL = 0,
+  WHOLE = 1
+}
+
+export enum UserRole {
+  BUYER = 'buyer',
+  SELLER = 'seller',
+  VALIDATOR = 'validator',
+  ADMIN = 'admin'
+}
+
+export enum KYCStatus {
+  NOT_SUBMITTED = 0,
+  PENDING = 1,
+  APPROVED = 2,
+  REJECTED = 3
+}
+
+export enum RiskLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high'
+}
+
+export interface KYCData {
+  governmentId: string; // IPFS URI or hash
+  proofOfAddress: string; // IPFS URI or hash
+  additionalDocs: string[]; // Additional document URIs
+  nationality: string;
+  status: KYCStatus;
+  verifiedAt: number;
+  updatedAt: number;
+  rejectionReason?: string;
+}
+
+export interface Listing {
+  id: number;
+  assetId: number;
+  seller: string;
+  paymentToken: string; // address(0) for ETH
+  price: BigNumber;
+  tokenAmount: number;
+  listingType: ListingType;
+  auctionEndTime: number;
+  status: ListingStatus;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ListingDetails extends Listing {
+  asset: AssetDetails;
+  highestBid?: BigNumber;
+  highestBidder?: string;
+}
+
+export enum ListingStatus {
+  ACTIVE = 0,
+  SOLD = 1,
+  CANCELLED = 2,
+  EXPIRED = 3
+}
 
 export interface Asset {
-  id: string;
+  id: number;
   title: string;
   description: string;
   category: AssetCategory;
-  status: AssetStatus;
-  imageUrl: string;
-  images?: string[];
-  videos?: string[];
-  documents?: AssetDocument[];
-  price: {
-    amount: number;
-    currency: string;
-  };
-  tokenization: {
-    type: TokenizationType;
-    totalTokens: number;
-    availableTokens: number;
-    pricePerToken: number;
-  };
+  price: BigNumber;
+  tokenizationType: TokenizationType;
+  totalTokens: number;
+  pricePerToken: BigNumber;
   listingType: ListingType;
-  isVerified: boolean;
-  location?: AssetLocation;
-  specifications?: Record<string, string>;
-  owner: {
-    id: string;
-    name: string;
-    rating?: number;
-  };
-  validation?: AssetValidation;
-  createdAt: Date;
-  updatedAt: Date;
-  auctionEndTime?: string;
-  views: number;
-  likes: number;
-  value: number;
-  tokenId: string;
+  auctionEndTime: number;
+  royaltyReceiver: string;
+  royaltyFraction: number;
+  creator: string;
+  status: AssetStatus;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AssetDetails extends Asset {
+  currentOwner: string;
+  totalSupply: BigNumber;
+  availableSupply: BigNumber;
+  isListed: boolean;
+  currentListingId?: number;
+}
+
+// Event Types
+export interface AssetEvent {
+  assetId: number;
+  eventType: AssetEventType;
+  from: string;
+  to: string;
+  amount: BigNumber;
+  timestamp: number;
+}
+
+export enum AssetEventType {
+  CREATED = 'CREATED',
+  TRANSFER = 'TRANSFER',
+  LISTED = 'LISTED',
+  SOLD = 'SOLD',
+  DELISTED = 'DELISTED'
+}
+
+// Transaction Types
+export interface TransactionResponse {
+  hash: string;
+  confirmations: number;
+  from: string;
+  to: string;
+  value: BigNumber;
+  timestamp: number;
+}
+
+export interface TransactionReceipt {
+  status: boolean;
+  transactionHash: string;
+  blockNumber: number;
+  gasUsed: BigNumber;
+}
+
+// Configuration Types
+export interface RWAvenueConfig {
+  rpcUrl: string;
+  tokenAddress: string;
+  kycAddress: string;
+  marketplaceAddress: string;
+}
+
+// Document Types
+export enum DocumentType {
+  TITLE_DEED = 'title_deed',
+  CERTIFICATE = 'certificate',
+  VALUATION_REPORT = 'valuation_report',
+  OTHER = 'other'
 }
 
 export interface AssetDocument {
   id: string;
-  type: 'title_deed' | 'certificate' | 'valuation_report' | 'other';
-  url: string;
+  type: DocumentType;
+  uri: string; // IPFS URI
+  file?: File; // For file upload operations
+  description?: string;
   name: string;
   verified: boolean;
-  uploadedAt: Date;
+  uploadedAt: number;
+  verifiedAt?: number;
+  verifiedBy?: string;
 }
 
-export interface AssetLocation {
-  address: string;
-  city: string;
-  country: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-}
-
+// Validation Types
 export interface AssetValidation {
   status: AssetStatus;
   validatedBy?: string;
-  validatedAt?: Date;
+  validatedAt?: number;
   comments?: string;
   documents?: AssetDocument[];
+  riskLevel?: RiskLevel;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  roles: UserRole[];
-  kyc: {
-    status: KYCStatus;
-    documents: {
-      idVerification?: AssetDocument;
-      addressProof?: AssetDocument;
-      additionalDocs?: AssetDocument[];
-    };
-    verifiedAt?: Date;
-  };
-  wallet: {
-    address: string;
-    balance: number;
-    currency: string;
-  };
-  profile: {
-    bio?: string;
-    location?: string;
-    website?: string;
-    social?: {
-      twitter?: string;
-      linkedin?: string;
-    };
-  };
-  stats: {
-    assetsListed: number;
-    assetsSold: number;
-    assetsBought: number;
-    totalValue: number;
-    rating: number;
-    reviews: number;
-  };
-  preferences: {
-    notifications: boolean;
-    newsletter: boolean;
-    twoFactorEnabled: boolean;
-    categories: AssetCategory[];
-  };
-  bankAccount?: {
-    verified: boolean;
-    last4: string;
-    type: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Transaction {
-  id: string;
-  type: 'buy' | 'sell' | 'bid' | 'tokenize';
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  asset: {
-    id: string;
-    title: string;
-    imageUrl: string;
-  };
-  amount: {
-    value: number;
-    currency: string;
-  };
-  tokens?: {
-    amount: number;
-    price: number;
-  };
-  buyer: {
-    id: string;
-    name: string;
-  };
-  seller: {
-    id: string;
-    name: string;
-  };
-  paymentMethod: 'crypto' | 'fiat';
-  timestamp: Date;
-  hash?: string;
-}
-
+// Bid Types
 export interface Bid {
-  id: string;
-  assetId: string;
-  bidder: {
-    id: string;
-    name: string;
-    rating?: number;
-  };
-  amount: {
-    value: number;
-    currency: string;
-  };
-  status: 'active' | 'won' | 'lost' | 'cancelled';
-  createdAt: Date;
-  expiresAt?: Date;
+  listingId: number;
+  bidder: string;
+  amount: BigNumber;
+  timestamp: number;
+  status: BidStatus;
+  transactionHash?: string;
 }
 
+export enum BidStatus {
+  ACTIVE = 'active',
+  WON = 'won',
+  LOST = 'lost',
+  CANCELLED = 'cancelled'
+}
 export interface Review {
-  id: string;
-  userId: string;
   targetId: string; // User or Asset ID being reviewed
   type: 'user' | 'asset';
   rating: number;
@@ -191,6 +220,8 @@ export interface Filter {
   verifiedOnly: boolean;
   sort: 'newest' | 'price-low-high' | 'price-high-low' | 'ending-soon';
 }
+
+export type { Transaction, TransactionType } from './transaction';
 
 export interface AssetFilter {
   category?: AssetCategory;

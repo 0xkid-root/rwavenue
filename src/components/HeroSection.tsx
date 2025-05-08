@@ -117,7 +117,7 @@ export const HeroSection = () => {
               <Button 
                 size="lg" 
                 className="font-medium"
-                icon={<ArrowRight />}
+                icon={<ArrowRight size={20} />}
                 iconPosition="right"
               >
                 Explore Marketplace
