@@ -6,6 +6,23 @@ import { Button } from '../components/ui/Button';
 import { useValidatorStore } from '../store/validatorStore';
 import { AssetCategory } from '../types';
 import { toast } from '@/hooks/use-toast';
+import { ethers } from 'ethers';
+
+// Minimal RyzerRegistry ABI (replace with your actual ABI)
+const RyzerRegistryABI = [
+  {
+    "inputs": [
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "companyType", "type": "string" },
+      { "internalType": "string", "name": "jurisdiction", "type": "string" }
+    ],
+    "name": "registerCompany",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
 
 const ValidatorsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,8 +34,8 @@ const ValidatorsPage = () => {
       searchTerm: searchTerm || undefined,
       expertise: selectedExpertise === 'all' ? undefined : selectedExpertise
     };
-    fetchValidators(filters);
-  }, [searchTerm, selectedExpertise]);
+    fetchValidators(filters); // Pass filters directly
+  }, [searchTerm, selectedExpertise, fetchValidators]);
 
   useEffect(() => {
     if (error) {
@@ -29,15 +46,49 @@ const ValidatorsPage = () => {
       });
     }
   }, [error]);
-  
+
   const expertiseOptions: { value: AssetCategory | 'all', label: string }[] = [
     { value: 'all', label: 'All Expertise' },
-    { value: 'watches', label: 'Watches' },
-    { value: 'art', label: 'Art' },
-    { value: 'collectibles', label: 'Collectibles' },
-    { value: 'jewels', label: 'Jewels' },
-    { value: 'real-estate', label: 'Real Estate' },
+    { value: AssetCategory.WATCHES, label: 'Watches' },
+    { value: AssetCategory.ART, label: 'Art' },
+    { value: AssetCategory.COLLECTIBLES, label: 'Collectibles' },
+    { value: AssetCategory.REAL_ESTATE, label: 'Real Estate' },
   ];
+
+  const handleApplyValidator = async () => {
+    try {
+      if (!(window as any).ethereum) {
+        throw new Error('MetaMask is not installed');
+      }
+
+      // Connect to Ethereum provider (MetaMask)
+      const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+      const signer = await provider.getSigner();
+      const ryzerRegistryAddress = '0xYourContractAddressHere'; // Replace with actual contract address
+      const ryzerRegistry = new ethers.Contract(ryzerRegistryAddress, RyzerRegistryABI, signer);
+
+      // Register a company (example; adjust as needed)
+      const tx = await ryzerRegistry.registerCompany(
+        await signer.getAddress(),
+        'Validator Corp',
+        'LLC',
+        'USA'
+      );
+      const receipt = await tx.wait();
+
+      toast({
+        title: 'Application Submitted',
+        description: `Your validator application has been submitted successfully. Transaction: ${receipt.hash}`,
+      });
+    } catch (error: any) {
+      console.error('Error submitting validator application:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to submit validator application. Please try again.',
+        variant: 'destructive'
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50 py-8">
@@ -118,30 +169,7 @@ const ValidatorsPage = () => {
               </p>
               <Button 
                 className="bg-white text-primary-800 hover:bg-neutral-100"
-                onClick={async () => {
-                  try {
-                    const result = await useValidatorStore.getState().submitValidatorApplication({
-                      name: '',
-                      expertise: [],
-                      jurisdiction: '',
-                      credentials: [],
-                      verificationFee: {
-                        amount: 0,
-                        currency: 'USD'
-                      }
-                    });
-                    toast({
-                      title: 'Application Submitted',
-                      description: `Your application (ID: ${result.applicationId}) has been submitted successfully.`,
-                    });
-                  } catch (error) {
-                    toast({
-                      title: 'Error',
-                      description: 'Failed to submit validator application. Please try again.',
-                      variant: 'destructive'
-                    });
-                  }
-                }}
+                onClick={handleApplyValidator}
               >
                 Apply Now
               </Button>

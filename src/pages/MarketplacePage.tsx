@@ -1,5 +1,5 @@
-import  { useState, useEffect } from 'react';
-import { Search, Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Grid, List } from 'lucide-react';
 import { useMockDataStore } from '@/store/mockDataStore';
 import { Button } from '@/components/ui/Button';
 import { AssetCategory, Asset } from '@/types';
@@ -7,13 +7,14 @@ import { CategoryFilter } from '@/components/marketplace/CategoryFilter';
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters';
 import { QuickViewModal } from '@/components/marketplace/QuickViewModal';
 import { AssetGrid } from '@/components/marketplace/AssetGrid';
+import { ethers } from 'ethers';
 
 const sortOptions = [
   { value: 'newest', label: 'Newest First' },
   { value: 'price-low-high', label: 'Price: Low to High' },
   { value: 'price-high-low', label: 'Price: High to Low' },
   { value: 'ending-soon', label: 'Auction Ending Soon' },
-];
+] as const;
 
 export default function MarketplacePage() {
   const { assets, loading, loadMoreAssets, filterAssets } = useMockDataStore();
@@ -24,9 +25,8 @@ export default function MarketplacePage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState<'newest' | 'price-low-high' | 'price-high-low' | 'ending-soon'>('newest');
+  const [sortOption, setSortOption] = useState<typeof sortOptions[number]['value']>('newest');
   const [quickViewAsset, setQuickViewAsset] = useState<Asset | null>(null);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>(assets);
 
   useEffect(() => {
@@ -48,14 +48,14 @@ export default function MarketplacePage() {
     result = sortAssets(result, sortOption);
     
     setFilteredAssets(result);
-  }, [assets, searchQuery, selectedCategory, priceRange, verifiedOnly, sortOption]);
+  }, [assets, searchQuery, selectedCategory, priceRange, verifiedOnly, sortOption, filterAssets]);
 
-  const sortAssets = (assetsToSort: Asset[], sortBy: string) => {
+  const sortAssets = (assetsToSort: Asset[], sortBy: typeof sortOptions[number]['value']) => {
     switch (sortBy) {
       case 'price-low-high':
-        return [...assetsToSort].sort((a, b) => a.price.amount - b.price.amount);
+        return [...assetsToSort].sort((a, b) => a.price.toNumber() - b.price.toNumber());
       case 'price-high-low':
-        return [...assetsToSort].sort((a, b) => b.price.amount - a.price.amount);
+        return [...assetsToSort].sort((a, b) => b.price.toNumber() - a.price.toNumber());
       case 'ending-soon':
         return [...assetsToSort].sort((a, b) => {
           if (!a.auctionEndTime) return 1;
@@ -116,7 +116,7 @@ export default function MarketplacePage() {
             <div className="flex-1 md:flex-none ml-auto">
               <select
                 value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as any)}
+                onChange={(e) => setSortOption(e.target.value as typeof sortOptions[number]['value'])}
                 className="w-full md:w-auto px-3 py-2 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
               >
                 {sortOptions.map(option => (
@@ -127,18 +127,6 @@ export default function MarketplacePage() {
               </select>
             </div>
           </div>
-        </div>
-
-        {/* Mobile Filter Button */}
-        <div className="md:hidden mb-4">
-          <Button
-            onClick={() => setIsMobileFilterOpen(true)}
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-          >
-            <SlidersHorizontal size={18} />
-            Show All Filters
-          </Button>
         </div>
 
         {/* Category Filter */}
@@ -154,7 +142,7 @@ export default function MarketplacePage() {
             onClose={() => setIsFilterOpen(false)}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
-                    priceRange={priceRange} 
+            priceRange={priceRange} 
             onPriceRangeChange={setPriceRange}
             verifiedOnly={verifiedOnly}
             onVerifiedChange={setVerifiedOnly}

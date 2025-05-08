@@ -1,18 +1,64 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Wallet, Repeat, CreditCard, Check, X, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Clock, Wallet, Repeat, CreditCard, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useMockDataStore } from '@/store/mockDataStore';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import BigNumber from 'bignumber.js';
+
+// Define types (aligned with AssetExplorerPage.tsx)
+type AssetCategory = 'watches' | 'art' | 'collectibles' | 'jewelry' | 'real-estate' | 'vehicles';
+type AssetStatus = 'listed' | 'sold' | 'pending';
+type TokenizationType = 'fractional' | 'whole';
+type ListingType = 'auction' | 'fixed' | 'swap';
+
+interface Asset {
+  id: number;
+  title: string;
+  description: string;
+  category: AssetCategory;
+  status: AssetStatus;
+  images: string[];
+  price: BigNumber;
+  tokenizationType: TokenizationType;
+  totalTokens: number;
+  availableTokens: number;
+  pricePerToken: number;
+  royaltyReceiver: string;
+  royaltyPercentage: number;
+  listingType: ListingType;
+  owner: { id: string; name: string; rating: number };
+  createdAt: number;
+  updatedAt: number;
+  auctionEndTime?: number;
+  views: number;
+  likes: number;
+  value: number;
+  tokenId: string;
+}
+
+// Simplified formatters (replace with actual implementations if different)
+const formatCurrency = (amount: BigNumber, currency: string = 'USD') => {
+  return `${currency} ${amount.toFormat(2)}`;
+};
+
+const formatDate = (timestamp: number) => {
+  return new Date(timestamp).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
 const AssetDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { assets } = useMockDataStore();
-  const asset = assets.find(a => a.id === id);
+  const asset = id ? assets.find(a => a.id === Number(id)) : undefined;
 
-  if (!asset) {
+  if (!asset || !id) {
     return (
       <div className="container-custom py-16 text-center">
         <h2 className="text-2xl font-bold text-neutral-800 mb-4">Asset Not Found</h2>
@@ -28,18 +74,15 @@ const AssetDetailPage = () => {
     title, 
     category, 
     price, 
-    imageUrl, 
-    isVerified, 
-    validation,
+    images, 
     description,
-    specifications,
     listingType,
     auctionEndTime
   } = asset;
 
-  // Mock related assets (just using other assets from the mock data)
+  // Mock related assets
   const relatedAssets = assets
-    .filter(a => a.category === category && a.id !== id)
+    .filter(a => a.category === category && a.id !== Number(id))
     .slice(0, 3);
 
   return (
@@ -63,25 +106,19 @@ const AssetDetailPage = () => {
             >
               <div className="relative rounded-lg overflow-hidden">
                 <img
-                  src={imageUrl}
+                  src={images[0]}
                   alt={title}
                   className="w-full h-96 object-cover"
                 />
-                {isVerified && (
-                  <div className="absolute top-4 right-4 bg-success-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                    <Check size={14} className="mr-1" />
-                    Verified
-                  </div>
-                )}
               </div>
 
-              {/* Additional images would go here (using placeholder for now) */}
+              {/* Additional images */}
               <div className="grid grid-cols-4 gap-2 mt-4">
-                {[1, 2, 3, 4].map(i => (
+                {images.slice(0, 4).map((img, i) => (
                   <div key={i} className="aspect-square rounded-md overflow-hidden">
                     <img
-                      src={imageUrl}
-                      alt={`${title} view ${i}`}
+                      src={img}
+                      alt={`${title} view ${i + 1}`}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
                   </div>
@@ -100,9 +137,11 @@ const AssetDetailPage = () => {
                 <div className="flex justify-between items-start mb-2">
                   <h1 className="text-3xl font-bold text-primary-800">{title}</h1>
                   <Badge 
-                    variant={listingType === 'auction' ? 'primary' : 
-                            listingType === 'fixed' ? 'success' : 
-                            listingType === 'swap' ? 'secondary' : 'error'}
+                    variant={
+                      listingType === 'auction' ? 'primary' : 
+                      listingType === 'fixed' ? 'success' : 
+                      listingType === 'swap' ? 'secondary' : 'error'
+                    }
                     className="capitalize"
                   >
                     {listingType}
@@ -116,7 +155,7 @@ const AssetDetailPage = () => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-neutral-600">Current {listingType === 'auction' ? 'Bid' : 'Price'}</span>
                   <span className="text-2xl font-bold text-primary-800">
-                    {formatCurrency(price.amount, price.currency)}
+                    {formatCurrency(price)}
                   </span>
                 </div>
                 
@@ -129,24 +168,6 @@ const AssetDetailPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Validator Info */}
-              {validation?.validatedBy && (
-                <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-2">Validator</h3>
-                  <div className="flex items-center">
-                    <div className="bg-primary-100 p-2 rounded-full mr-3">
-                      <Check size={16} className="text-primary-800" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{validation.validatedBy}</p>
-                      <p className="text-sm text-neutral-600">
-                        Validated on {validation.validatedAt ? formatDate(validation.validatedAt.toISOString()) : 'Pending'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
@@ -178,21 +199,6 @@ const AssetDetailPage = () => {
                 <p className="text-neutral-700">{description}</p>
               </div>
 
-              {/* Asset Specifications */}
-              {specifications && (
-                <div className="border-t border-neutral-200 pt-6">
-                  <h3 className="text-lg font-semibold mb-3">Specifications</h3>
-                  <div className="grid grid-cols-2 gap-y-2">
-                    {Object.entries(specifications).map(([key, value]) => (
-                      <div key={key} className="flex flex-col">
-                        <span className="text-sm text-neutral-500">{key}</span>
-                        <span className="text-neutral-800">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* View on Blockchain Link */}
               <div className="mt-auto pt-4 border-t border-neutral-200">
                 <a
@@ -221,7 +227,7 @@ const AssetDetailPage = () => {
                   <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <div className="relative h-48">
                       <img
-                        src={relatedAsset.imageUrl}
+                        src={relatedAsset.images[0]}
                         alt={relatedAsset.title}
                         className="w-full h-full object-cover"
                       />
@@ -230,7 +236,7 @@ const AssetDetailPage = () => {
                       <h4 className="font-semibold truncate">{relatedAsset.title}</h4>
                       <p className="text-neutral-500 text-sm capitalize">{relatedAsset.category.replace('-', ' ')}</p>
                       <p className="text-primary-800 font-bold mt-2">
-                        {formatCurrency(relatedAsset.price.amount, relatedAsset.price.currency)}
+                        {formatCurrency(relatedAsset.price)}
                       </p>
                     </div>
                   </div>
