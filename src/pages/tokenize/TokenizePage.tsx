@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Upload, Shield, Camera, X } from 'lucide-react';
@@ -8,11 +8,12 @@ import useIPFSUpload from "@/hooks/useIPFSUpload";
 import { useNotificationStore } from '@/store/notificationStore';
 import { mockValidators } from '@/data/mockData';
 import { toast } from 'react-hot-toast';
+import { AssetCategory } from '@/types';
 
 export interface FormData {
   title: string;
   description: string;
-  category: string;
+  category: AssetCategory | '';
   price: string;
   currency: 'USDT' | 'ETH';
   images: File[];
@@ -119,7 +120,7 @@ export default function TokenizePage() {
   return (
     <div className="container py-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Tokenize hiii Your Asset</h1>
+        <h1 className="text-3xl font-bold mb-8">Tokenize Your Asset</h1>
 
         {/* Progress Steps */}
         <div className="flex justify-between mb-12">
@@ -131,7 +132,7 @@ export default function TokenizePage() {
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                   step >= s.number ? 'bg-primary-600 text-white' : 'bg-neutral-200'
                 }`}>
-                  <s.icon size={20} />
+                  {React.createElement(s.icon, { size: 20 })}
                 </div>
                 <span className="text-sm mt-2">{s.title}</span>
               </div>
@@ -174,15 +175,15 @@ export default function TokenizePage() {
                 </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as AssetCategory | '' })}
                   className="input"
                 >
                   <option value="">Select a category</option>
-                  <option value="watches">Watches</option>
-                  <option value="art">Art</option>
-                  <option value="collectibles">Collectibles</option>
-                  <option value="jewels">Jewels</option>
-                  <option value="real-estate">Real Estate</option>
+                  <option value={AssetCategory.WATCHES}>Watches</option>
+                  <option value={AssetCategory.ART}>Art</option>
+                  <option value={AssetCategory.COLLECTIBLES}>Collectibles</option>
+                  <option value={AssetCategory.JEWELRY}>Jewelry</option>
+                  <option value={AssetCategory.REAL_ESTATE}>Real Estate</option>
                 </select>
               </div>
 

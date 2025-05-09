@@ -7,6 +7,31 @@ import { ValidatorCard } from '../components/ValidatorCard';
 import { mockValidators } from '../data/mockData';
 import { Button } from '../components/ui/Button';
 import { Header } from '../components/layout/Header';
+import { ValidatorProfile } from '../types/validator';
+import { Validator } from '../services/validatorService';
+
+// Adapter function to convert Validator to ValidatorProfile
+const adaptValidatorToProfile = (validator: Validator): ValidatorProfile => {
+  return {
+    id: validator.id,
+    name: validator.name,
+    avatar: validator.avatar || '',
+    expertise: validator.expertise || [],
+    jurisdiction: validator.jurisdiction || '',
+    licenses: [], // Not available in Validator type, using empty array
+    reputation: validator.reputation || 0,
+    validationCount: validator.validationCount || 0,
+    availableForValidation: validator.availability || false,
+    fees: {
+      base: validator.verificationFee?.amount || 0,
+      currency: validator.verificationFee?.currency || 'USD'
+    },
+    languages: ['English'], // Default language
+    responseTime: typeof validator.responseTime === 'string' ? 
+      parseInt(validator.responseTime) : 24, // Convert string to number if needed
+    contactInfo: { email: '' } // Default contact info
+  };
+};
 
 const HomePage = () => {
   // Show only the top 3 featured validators
@@ -32,7 +57,7 @@ const HomePage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredValidators.map(validator => (
-              <ValidatorCard key={validator.id} validator={validator} />
+              <ValidatorCard key={validator.id} validator={adaptValidatorToProfile(validator)} />
             ))}
           </div>
           

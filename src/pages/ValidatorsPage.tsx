@@ -175,6 +175,7 @@ const ValidatorsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.3 }}
               >
+                {/* Render the ValidatorCard component */}
                 <ValidatorCard validator={validatorProfile} />
               </motion.div>
             );

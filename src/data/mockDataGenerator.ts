@@ -174,7 +174,7 @@ function generateAssetDescription(category: AssetCategory, title: string): strin
           'Recently serviced by authorized dealer.'
         ])} ${faker.lorem.paragraph()}`;
     
-    case 'art':
+    case AssetCategory.ART:
       return `Original ${title.toLowerCase()} by renowned artist ${faker.person.fullName()}. ${
         faker.helpers.arrayElement([
           'Signed by the artist.',
@@ -183,7 +183,7 @@ function generateAssetDescription(category: AssetCategory, title: string): strin
           'Exhibition history available.'
         ])} ${faker.lorem.paragraph()}`;
     
-    case 'real-estate':
+    case AssetCategory.REAL_ESTATE:
       return `Luxurious ${title.toLowerCase()} featuring ${faker.number.int({ min: 4, max: 8 })} bedrooms and ${
         faker.number.int({ min: 4, max: 10 })} bathrooms. ${faker.lorem.paragraphs(2)}`;
     
